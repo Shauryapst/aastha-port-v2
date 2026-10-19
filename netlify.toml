@@ -2,7 +2,24 @@
 [build]
   publish = "."
 
+# images rarely change: keep them for 30 days, and serve a stale copy while checking for a new one
 [[headers]]
   for = "/img/*"
   [headers.values]
+    Cache-Control = "public, max-age=2592000, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/og.jpg"
+  [headers.values]
     Cache-Control = "public, max-age=604800"
+
+# the page itself is always checked, so edits show up straight away
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

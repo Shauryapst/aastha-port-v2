@@ -504,7 +504,8 @@
   S.frame = function (y, vh, still) {
     for (var i = 0; i < S.list.length; i++) {
       var s = S.list[i];
-      if (s.top - vh * 2.5 < y + vh && s.top + s.h + vh > y) s.load();       // fetch assets a little early
+      if (!document.documentElement.classList.contains("loading") &&   // let the first pages load first
+          s.top - vh * 2.5 < y + vh && s.top + s.h + vh > y) s.load();       // fetch assets a little early
       if (s.top < y + vh && s.top + s.h > y) s.render(still ? 1 : S.progress(s, y, vh));
     }
   };

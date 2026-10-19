@@ -10,10 +10,11 @@
 </script>
 <meta name="theme-color" content="#efe8d8">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="preload" as="image" href="img/01.webp" imagesrcset="img/01.webp 2400w, img/xl/01.webp 4200w" imagesizes="(max-aspect-ratio: 1/1) 260vh, 92vw">
+<link rel="preload" as="image" href="img/01.webp" imagesrcset="img/w1200/01.webp 1200w, img/w1800/01.webp 1800w, img/01.webp 2400w" imagesizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Italiana&family=Jost:wght@400;500;600&display=swap">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Italiana&family=Jost:wght@400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Italiana&family=Jost:wght@400;500;600&display=swap"></noscript>
 <script>document.documentElement.classList.add("js","loading")</script>
 <style>
 /* =========================================================
@@ -69,16 +70,50 @@ button{font:inherit;color:inherit}
 #totop svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .5s var(--ease)}
 #totop:hover svg{transform:translateY(-3px)}
 
-/* phones and tablets held upright: each page is a full-height card — swipe sideways to read it */
-html.portrait{scroll-snap-type:y proximity}
-.portrait #stack{width:auto;padding:0;gap:0;display:block}
-.portrait .pg{height:100vh;height:100dvh;display:flex;align-items:center;overflow-x:auto;overflow-y:hidden;
-  -webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-align:start;overscroll-behavior-x:contain;padding:8px 0 0 14px}
-.portrait .pg::-webkit-scrollbar{display:none}
-.portrait .pg::after{content:"";flex:0 0 14px;height:1px}
-.portrait .frame{flex:0 0 auto;width:auto;height:calc(100dvh - 150px);height:calc(100vh - 150px);aspect-ratio:7015/2480}
-@supports (height:100dvh){.portrait .frame{height:calc(100dvh - 150px)}}
-.portrait .end{height:60vh;align-items:center;scroll-snap-align:end;padding:0}
+/* phones held upright: every page whole, fitted to the width — tap one to read it full-screen */
+.portrait #stack{width:auto;padding:84px 12px 0;gap:16px}
+.portrait .pg{height:auto;display:block;overflow:visible;padding:0}
+.portrait .frame{width:100%;height:auto;aspect-ratio:7015/2480;border-radius:5px;transform:none!important}
+.portrait .art{transform:none!important}
+.portrait .pg:not(.pg-toc) .frame::after{content:"";position:absolute;right:7px;bottom:7px;z-index:5;width:24px;height:24px;border-radius:50%;
+  background:rgba(251,248,241,.92) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f2b2a' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7'/%3E%3C/svg%3E") center/13px no-repeat;
+  box-shadow:0 2px 6px rgba(31,43,42,.25);pointer-events:none}
+.portrait .ch-start{margin-top:14px}
+.portrait .end{padding:44px 0 130px}
+/* on phones the top and bottom bars get their own paper, so they never sit on top of text */
+.portrait .chrome,.portrait .chrome-b{mix-blend-mode:normal;color:var(--ink);pointer-events:auto;
+  background:rgba(239,232,216,.92);-webkit-backdrop-filter:blur(10px) saturate(1.2);backdrop-filter:blur(10px) saturate(1.2)}
+.portrait .chrome{padding:calc(12px + env(safe-area-inset-top,0px)) 16px 16px;align-items:center;box-shadow:0 1px 0 rgba(31,43,42,.08)}
+.portrait .chrome-b{padding:8px 16px calc(8px + env(safe-area-inset-bottom,0px));align-items:center;box-shadow:0 -1px 0 rgba(31,43,42,.08)}
+.portrait .chrome-b .nb{width:42px;height:42px}
+.portrait .chn{font-size:19px}
+.portrait #stack{padding-top:80px}
+.portrait .end{padding-bottom:110px}
+.portrait .ct-mail{font-size:min(4.9vw,30px);padding:18px 18px;gap:10px}
+.portrait .ct-mail span{white-space:nowrap;overflow-wrap:normal}
+
+/* ---------- phone page reader: one page full-screen, swipe across, double-tap to zoom ---------- */
+#pv{position:fixed;inset:0;z-index:230;background:#0f2324;color:var(--cream);display:flex;flex-direction:column;
+  opacity:0;visibility:hidden;transition:opacity .3s var(--ease),visibility 0s .3s}
+#pv.on{opacity:1;visibility:visible;transition:opacity .3s var(--ease)}
+.pv-top,.pv-bot{flex:none;display:flex;align-items:center;gap:12px;padding:calc(12px + env(safe-area-inset-top,0px)) 14px 10px}
+.pv-bot{padding:10px 14px calc(12px + env(safe-area-inset-bottom,0px))}
+.pv-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 20px/1.2 var(--font-display)}
+.pv-t small{font:500 11px/1 var(--font-ui);letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin-left:8px}
+.pv-n{font:500 12px/1 var(--font-ui);letter-spacing:.08em;opacity:.75;font-variant-numeric:tabular-nums}
+.pv-btn{appearance:none;border:1.5px solid rgba(242,235,220,.55);background:none;color:inherit;border-radius:999px;min-width:44px;height:44px;padding:0 14px;
+  font:500 12px/1 var(--font-ui);letter-spacing:.12em;text-transform:uppercase;display:grid;place-items:center}
+.pv-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8}
+.pv-btn:disabled{opacity:.3}
+.pv-hint{flex:1;text-align:center;font:500 11px/1.4 var(--font-ui);letter-spacing:.06em;opacity:.7}
+.pv-s{position:relative;flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;
+  display:flex;align-items:center}
+.pv-s::-webkit-scrollbar{display:none}
+.pv-s img{display:block;height:100%;width:auto;max-width:none;flex:none;margin:0 14px;border-radius:4px;box-shadow:0 20px 50px -20px rgba(0,0,0,.6);
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.pv-s.z{align-items:flex-start}
+.pv-s.z img{height:200%}
+html.pv-open,html.pv-open body{overflow:hidden}
 
 /* ---------- loader: name writes itself, then the screen splits open ---------- */
 #loader{position:fixed;inset:0;z-index:300;color:var(--ink)}
@@ -641,6 +676,14 @@ html.reduced .sc-pin{position:relative;height:100vh}
   <div class="end"><button id="totop" type="button" data-cur="btn" data-mag>Back to top <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5"/></svg></button></div>
 </main>
 
+<div id="pv" role="dialog" aria-modal="true" aria-label="Page reader" aria-hidden="true">
+  <div class="pv-top"><span class="pv-t" id="pvT"></span><span class="pv-n" id="pvN"></span><button class="pv-btn" id="pvClose" type="button">Close</button></div>
+  <div class="pv-s" id="pvS"><img id="pvImg" alt="" draggable="false"></div>
+  <div class="pv-bot"><button class="pv-btn" id="pvPrev" type="button" aria-label="Previous page"><svg viewBox="0 0 16 16"><path d="M10 3 5 8l5 5"/></svg></button>
+    <span class="pv-hint" id="pvHint">Swipe across to read · double-tap to zoom</span>
+    <button class="pv-btn" id="pvNext" type="button" aria-label="Next page"><svg viewBox="0 0 16 16"><path d="m6 3 5 5-5 5"/></svg></button></div>
+</div>
+
 <div id="ct" role="dialog" aria-modal="true" aria-labelledby="ctCardName" aria-hidden="true">
   <div class="ct-scrim"></div>
   <div class="ct-card">
@@ -700,9 +743,8 @@ var isTitle=secs.map(function(s){return s.classList.contains("ch-start")&&!s.cla
 var toc=$(".pg-toc");
 var tops=[], hs=[], cur=0, ready=false, idxOpen=false, portrait=false;
 
-function layout(){portrait=mqP.matches;root.classList.toggle("portrait",portrait);measure();if(portrait)startRows()}
+function layout(){portrait=mqP.matches;root.classList.toggle("portrait",portrait);measure()}
 function measure(){var y=pageYOffset;tops=secs.map(function(s){return s.getBoundingClientRect().top+y});hs=secs.map(function(s){return s.offsetHeight});if(SC)SC.measure()}
-function startRows(){secs.forEach(function(s){var x=+s.dataset.x||0;s.scrollLeft=(s.scrollWidth-s.clientWidth)*x})}
 function maxY(){return document.documentElement.scrollHeight-innerHeight}
 layout();
 
@@ -717,7 +759,7 @@ var first=secs.slice(0,2).map(function(s){return $("img",s)});
 function progress(){target=Math.max(target,first.filter(function(im){return im.complete&&im.naturalWidth}).length/first.length*100)}
 first.forEach(function(im){im.addEventListener("load",progress);im.addEventListener("error",progress)});
 progress();
-var minShow=reduced?0:1700;
+var minShow=reduced?0:(ss("seen")?350:1300);   /* returning in the same session: barely pause */
 (function count(){
   shown+=(target-shown)*0.1+0.3; if(shown>target)shown=target;
   lcount.textContent=pad(Math.min(99,Math.round(shown))); lline.style.width=shown+"%";
@@ -728,13 +770,13 @@ var minShow=reduced?0:1700;
 function start(){
   if(ready)return; ready=true;
   var L=$("#loader"); L.classList.add("out"); setTimeout(function(){L.remove()},reduced?0:1500);
-  root.classList.remove("loading"); placeStitch();
+  root.classList.remove("loading"); placeStitch(); ss("seen","1");
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(placeStitch);
   measure();
   var m=/^#p(\d+)$/.exec(location.hash), n=m?clamp(+m[1],1,N):1;
   if(n>1)goTo(n,true);
   onScroll(true);
-  if(portrait&&!ss("swiped"))setTimeout(function(){toast("Swipe sideways to read each page · hold to magnify",4200)},1600);
+  if(portrait&&!ss("pvseen"))setTimeout(function(){toast("Tap any page to read it full-screen",3800)},1600);
 }
 
 /* ---------- smooth scrolling (mouse & trackpad) + gliding page jumps ---------- */
@@ -764,7 +806,6 @@ function normDelta(e){return e.deltaY*(e.deltaMode===1?32:e.deltaMode===2?innerH
 
 function targetFor(i){
   if(i<=1)return 0;
-  if(portrait)return tops[i-1];
   return tops[i-1]+hs[i-1]/2-innerHeight/2;   /* centre the page on screen */
 }
 function goTo(i,instant,scenic){
@@ -836,6 +877,7 @@ addEventListener("scroll",function(){onScroll()},{passive:true});
 /* ---------- gentle zoom on every page + parallax on project title pages ---------- */
 var fxState=[];
 function fx(){
+  if(portrait)return;                       /* phones show each page whole — nothing zooms or crops */
   var vh=innerHeight, y=pageYOffset, mid=y+vh/2;
   for(var k=0;k<secs.length;k++){
     var top=tops[k], h=hs[k];
@@ -1005,6 +1047,56 @@ if(fine&&!reduced)$$(".ix-thumb",ix).forEach(function(t){
   }
 })();
 
+/* ---------- phone page reader ---------- */
+(function(){
+  var pv=$("#pv"), sc=$("#pvS"), im=$("#pvImg"), at=0, open=false, pushed=false, lastTap=0;
+  var pages=secs.filter(function(s){return !s.classList.contains("pg-toc")&&$("img[data-n]",s)});
+  function srcN(s){return +$("img[data-n]",s).dataset.n}
+  function show(k,keepZoom){
+    at=clamp(k,0,pages.length-1); var s=pages[at], n=srcN(s), i=+s.dataset.i, ch=chapterOf(i);
+    sc.classList.remove("z");
+    im.onload=null; im.src=std(n);
+    var x=+s.dataset.x||0;
+    im.onload=function(){sc.scrollLeft=(sc.scrollWidth-sc.clientWidth)*x;sc.scrollTop=0;
+      var big=new Image(); big.onload=function(){if(pages[at]===s)im.src=big.src}; big.src=xl(n)};   /* sharpen with the large file */
+    $("#pvT").innerHTML=esc(ch.title)+(P[i-1]&&P[i-1]!==ch.title?"<small>"+esc(P[i-1])+"</small>":"");
+    $("#pvN").textContent=pad(i)+" / "+pad(N);
+    $("#pvPrev").disabled=at===0; $("#pvNext").disabled=at===pages.length-1;
+    if(!open)return; goTo(i,true);
+  }
+  function esc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+  function openPv(s){
+    open=true; show(pages.indexOf(s)); pv.classList.add("on"); pv.setAttribute("aria-hidden","false"); root.classList.add("pv-open"); ss("pvseen","1");
+    try{history.pushState({pv:1},"");pushed=true}catch(_){}
+  }
+  function closePv(fromPop){
+    if(!open)return; open=false; pv.classList.remove("on"); pv.setAttribute("aria-hidden","true"); root.classList.remove("pv-open");
+    var s=pages[at]; if(s)goTo(+s.dataset.i,true);
+    if(pushed&&!fromPop){pushed=false;try{history.back()}catch(_){}}
+  }
+  addEventListener("popstate",function(){if(open){pushed=false;closePv(true)}});
+  document.addEventListener("click",function(e){
+    if(!portrait||open||!ready)return;
+    var s=e.target.closest(".pg"); if(!s||e.target.closest(".hot,a,button")||s.classList.contains("pg-toc"))return;
+    if(pages.indexOf(s)<0)return; e.preventDefault(); openPv(s);
+  });
+  $("#pvClose").addEventListener("click",function(){closePv()});
+  $("#pvPrev").addEventListener("click",function(){show(at-1)});
+  $("#pvNext").addEventListener("click",function(){show(at+1)});
+  addEventListener("keydown",function(e){if(!open)return;
+    if(e.key==="Escape"){e.stopImmediatePropagation();closePv()} else if(e.key==="ArrowRight"){e.stopImmediatePropagation();show(at+1)} else if(e.key==="ArrowLeft"){e.stopImmediatePropagation();show(at-1)}},true);
+  // double-tap: zoom in to 2x on the spot that was tapped, double-tap again to zoom out
+  sc.addEventListener("click",function(e){
+    var now=Date.now(); if(now-lastTap>320){lastTap=now;return} lastTap=0;
+    var r=im.getBoundingClientRect(), fx_=(e.clientX-r.left)/r.width, fy_=(e.clientY-r.top)/r.height, z=!sc.classList.contains("z");
+    sc.classList.toggle("z",z);
+    var r2=im.getBoundingClientRect();
+    sc.scrollLeft+= (r2.left+fx_*r2.width)-e.clientX; sc.scrollTop+= (r2.top+fy_*r2.height)-e.clientY;
+    $("#pvHint").textContent=z?"Drag to look around · double-tap to zoom out":"Swipe across to read · double-tap to zoom";
+  });
+  window.__pvOpen=function(){return open};
+})();
+
 /* ---------- contact card ---------- */
 var ct=$("#ct"), ctBtn=$("#ctBtn"), ctOpen=false;
 function openContact(){if(ctOpen)return;if(idxOpen)closeIndex();ctOpen=true;loupeOn=false;ct.classList.add("on");ct.setAttribute("aria-hidden","false");
@@ -1162,7 +1254,6 @@ if(fine){
   document.addEventListener("touchend",endHold);
   document.addEventListener("touchcancel",endHold);
   document.addEventListener("contextmenu",function(e){if(e.target.closest(".pg"))e.preventDefault()});
-  secs.forEach(function(s){s.addEventListener("scroll",function(){ss("swiped","1")},{passive:true,once:true})});
   (function tick(){paintLoupe(); if(!reduced)fx(); if(SC)SC.frame(pageYOffset,innerHeight,reduced); if(ST)ST.frame(pageYOffset,innerHeight); requestAnimationFrame(tick)})();
 }
 

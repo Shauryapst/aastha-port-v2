@@ -186,10 +186,11 @@
 </script>
 <meta name="theme-color" content="#efe8d8">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="preload" as="image" href="img/01.webp" imagesrcset="img/01.webp 2400w, img/xl/01.webp 4200w" imagesizes="(max-aspect-ratio: 1/1) 260vh, 92vw">
+<link rel="preload" as="image" href="img/01.webp" imagesrcset="img/w1200/01.webp 1200w, img/w1800/01.webp 1800w, img/01.webp 2400w" imagesizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Italiana&family=Jost:wght@400;500;600&display=swap">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Italiana&family=Jost:wght@400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Italiana&family=Jost:wght@400;500;600&display=swap"></noscript>
 <script>document.documentElement.classList.add("js","loading")</script>
 <style>
 /* =========================================================
@@ -245,16 +246,50 @@ button{font:inherit;color:inherit}
 #totop svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .5s var(--ease)}
 #totop:hover svg{transform:translateY(-3px)}
 
-/* phones and tablets held upright: each page is a full-height card — swipe sideways to read it */
-html.portrait{scroll-snap-type:y proximity}
-.portrait #stack{width:auto;padding:0;gap:0;display:block}
-.portrait .pg{height:100vh;height:100dvh;display:flex;align-items:center;overflow-x:auto;overflow-y:hidden;
-  -webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-align:start;overscroll-behavior-x:contain;padding:8px 0 0 14px}
-.portrait .pg::-webkit-scrollbar{display:none}
-.portrait .pg::after{content:"";flex:0 0 14px;height:1px}
-.portrait .frame{flex:0 0 auto;width:auto;height:calc(100dvh - 150px);height:calc(100vh - 150px);aspect-ratio:7015/2480}
-@supports (height:100dvh){.portrait .frame{height:calc(100dvh - 150px)}}
-.portrait .end{height:60vh;align-items:center;scroll-snap-align:end;padding:0}
+/* phones held upright: every page whole, fitted to the width — tap one to read it full-screen */
+.portrait #stack{width:auto;padding:84px 12px 0;gap:16px}
+.portrait .pg{height:auto;display:block;overflow:visible;padding:0}
+.portrait .frame{width:100%;height:auto;aspect-ratio:7015/2480;border-radius:5px;transform:none!important}
+.portrait .art{transform:none!important}
+.portrait .pg:not(.pg-toc) .frame::after{content:"";position:absolute;right:7px;bottom:7px;z-index:5;width:24px;height:24px;border-radius:50%;
+  background:rgba(251,248,241,.92) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231f2b2a' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7'/%3E%3C/svg%3E") center/13px no-repeat;
+  box-shadow:0 2px 6px rgba(31,43,42,.25);pointer-events:none}
+.portrait .ch-start{margin-top:14px}
+.portrait .end{padding:44px 0 130px}
+/* on phones the top and bottom bars get their own paper, so they never sit on top of text */
+.portrait .chrome,.portrait .chrome-b{mix-blend-mode:normal;color:var(--ink);pointer-events:auto;
+  background:rgba(239,232,216,.92);-webkit-backdrop-filter:blur(10px) saturate(1.2);backdrop-filter:blur(10px) saturate(1.2)}
+.portrait .chrome{padding:calc(12px + env(safe-area-inset-top,0px)) 16px 16px;align-items:center;box-shadow:0 1px 0 rgba(31,43,42,.08)}
+.portrait .chrome-b{padding:8px 16px calc(8px + env(safe-area-inset-bottom,0px));align-items:center;box-shadow:0 -1px 0 rgba(31,43,42,.08)}
+.portrait .chrome-b .nb{width:42px;height:42px}
+.portrait .chn{font-size:19px}
+.portrait #stack{padding-top:80px}
+.portrait .end{padding-bottom:110px}
+.portrait .ct-mail{font-size:min(4.9vw,30px);padding:18px 18px;gap:10px}
+.portrait .ct-mail span{white-space:nowrap;overflow-wrap:normal}
+
+/* ---------- phone page reader: one page full-screen, swipe across, double-tap to zoom ---------- */
+#pv{position:fixed;inset:0;z-index:230;background:#0f2324;color:var(--cream);display:flex;flex-direction:column;
+  opacity:0;visibility:hidden;transition:opacity .3s var(--ease),visibility 0s .3s}
+#pv.on{opacity:1;visibility:visible;transition:opacity .3s var(--ease)}
+.pv-top,.pv-bot{flex:none;display:flex;align-items:center;gap:12px;padding:calc(12px + env(safe-area-inset-top,0px)) 14px 10px}
+.pv-bot{padding:10px 14px calc(12px + env(safe-area-inset-bottom,0px))}
+.pv-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 20px/1.2 var(--font-display)}
+.pv-t small{font:500 11px/1 var(--font-ui);letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin-left:8px}
+.pv-n{font:500 12px/1 var(--font-ui);letter-spacing:.08em;opacity:.75;font-variant-numeric:tabular-nums}
+.pv-btn{appearance:none;border:1.5px solid rgba(242,235,220,.55);background:none;color:inherit;border-radius:999px;min-width:44px;height:44px;padding:0 14px;
+  font:500 12px/1 var(--font-ui);letter-spacing:.12em;text-transform:uppercase;display:grid;place-items:center}
+.pv-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8}
+.pv-btn:disabled{opacity:.3}
+.pv-hint{flex:1;text-align:center;font:500 11px/1.4 var(--font-ui);letter-spacing:.06em;opacity:.7}
+.pv-s{position:relative;flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;
+  display:flex;align-items:center}
+.pv-s::-webkit-scrollbar{display:none}
+.pv-s img{display:block;height:100%;width:auto;max-width:none;flex:none;margin:0 14px;border-radius:4px;box-shadow:0 20px 50px -20px rgba(0,0,0,.6);
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.pv-s.z{align-items:flex-start}
+.pv-s.z img{height:200%}
+html.pv-open,html.pv-open body{overflow:hidden}
 
 /* ---------- loader: name writes itself, then the screen splits open ---------- */
 #loader{position:fixed;inset:0;z-index:300;color:var(--ink)}
@@ -858,13 +893,13 @@ html.reduced .sc-pin{position:relative;height:100vh}
   <h1 class="sr">Aastha Rajput — Textile design portfolio 2026</h1>
   <section class="pg ch-start pg-cover" id="p1" data-i="1" data-x="0.5" aria-label="Page 1 of 44: Introduction, Cover">
     <div class="frame"><div class="art">
-      <img src="img/01.webp" srcset="img/01.webp 2400w, img/xl/01.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="1" width="2400" height="849" alt="Introduction — Cover" fetchpriority="high" decoding="async" draggable="false">
+      <img src="img/01.webp" srcset="img/w1200/01.webp 1200w, img/w1800/01.webp 1800w, img/01.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="1" width="2400" height="849" alt="Introduction — Cover" fetchpriority="high" decoding="async" draggable="false">
       <div class="cover-fx" aria-hidden="true"><img class="cv-patch" src="img/cover/t1.webp" alt="" decoding="async" style="left:31.786%;top:28.283%;width:18.81%;height:6.599%;--d:0.35s;--t:0.90s"><img class="cv-patch" src="img/cover/t2.webp" alt="" decoding="async" style="left:36.31%;top:34.882%;width:39.762%;height:32.458%;--d:1.00s;--t:2.10s"><img class="cv-patch" src="img/cover/t3.webp" alt="" decoding="async" style="left:61.19%;top:66.33%;width:15.833%;height:5.589%;--d:2.95s;--t:0.95s"><img class="cv-patch" src="img/cover/t2f.webp" alt="" decoding="async" style="left:54.286%;top:28.62%;width:5.714%;height:6.263%;--d:1.95s;--t:0.30s"><i class="cv-sheen"></i><i class="cv-light"></i><svg class="cv-sew" viewBox="0 0 4200 1485" preserveAspectRatio="none"><path id="cvs0" class="cv-path" d="M1845 1212 L1875 1214 L1905 1215 L1931 1216 L1950 1220 L1968 1227 L1988 1235 L2009 1244 L2030 1252 L2048 1260 L2067 1267 L2085 1276 L2100 1283 L2115 1290 L2132 1297 L2151 1305 L2170 1313 L2188 1320 L2207 1328 L2227 1335 L2250 1343 L2272 1351 L2292 1359 L2311 1366 L2330 1375 L2348 1384 L2367 1393 L2386 1404 L2405 1416 L2423 1428 L2435 1436 L2442 1441 L2450 1443"/><use href="#cvs0" class="cv-trail cv-trail0 gold"/><path id="cvs1" class="cv-path" d="M1950 1267 L1965 1270 L1980 1273 L1994 1275 L2007 1280 L2020 1288 L2036 1296 L2053 1303 L2070 1311 L2085 1319 L2100 1326 L2115 1333 L2132 1340 L2149 1348 L2167 1356 L2186 1363 L2205 1370 L2225 1376 L2246 1382 L2265 1390 L2282 1396 L2299 1404 L2316 1411 L2333 1420 L2350 1428 L2365 1436 L2380 1444 L2392 1452 L2400 1458 L2407 1463"/><use href="#cvs1" class="cv-trail cv-trail1 gold"/><path id="cvs2" class="cv-path" d="M3235 281 L3259 275 L3283 267 L3306 264 L3325 260 L3343 259 L3370 255 L3400 253 L3430 250 L3456 249 L3482 249 L3508 248 L3535 242 L3561 236 L3582 230 L3601 226 L3620 221 L3638 216 L3657 209 L3675 202 L3690 194 L3705 188 L3720 183 L3735 177 L3750 171 L3768 164 L3787 157 L3806 149 L3825 142 L3843 131 L3865 118 L3887 103 L3910 93 L3932 84 L3955 77 L3976 66 L3995 55 L4013 44 L4032 33 L4051 24 L4070 18"/><use href="#cvs2" class="cv-trail cv-trail2 cream"/><path id="cvs3" class="cv-path" d="M3320 286 L3350 286 L3380 282 L3410 282 L3440 278 L3470 278 L3497 276 L3523 277 L3550 276 L3572 274 L3595 266 L3616 256 L3635 247 L3653 242 L3672 239 L3691 235 L3710 229 L3725 221 L3740 214 L3756 207 L3775 200 L3793 192 L3812 185 L3831 177 L3850 169 L3868 161 L3887 153 L3906 143 L3925 133 L3943 122 L3965 111 L3987 100 L4010 90 L4028 80 L4047 71 L4065 63 L4080 55 L4095 49"/><use href="#cvs3" class="cv-trail cv-trail3 cream"/></svg></div><svg class="cv-needles" aria-hidden="true" viewBox="0 0 4200 1485" preserveAspectRatio="none"><g class="cv-needle"><g transform="scale(1.7)"><path d="M-128 0 Q-124 -7 -104 -8 L60 -3.2 Q78 0 60 3.2 L-104 8 Q-124 7 -128 0Z"/><ellipse cx="-110" cy="0" rx="10" ry="3"/></g></g><g class="cv-needle"><g transform="scale(1.7)"><path d="M-128 0 Q-124 -7 -104 -8 L60 -3.2 Q78 0 60 3.2 L-104 8 Q-124 7 -128 0Z"/><ellipse cx="-110" cy="0" rx="10" ry="3"/></g></g></svg>
     </div></div>
   </section>
   <section class="pg" id="p2" data-i="2" data-x="0" aria-label="Page 2 of 44: Introduction, About Aastha">
     <div class="frame"><div class="art">
-      <img src="img/02.webp" srcset="img/02.webp 2400w, img/xl/02.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="2" width="2400" height="849" alt="Introduction — About Aastha" decoding="async" draggable="false">
+      <img src="img/02.webp" srcset="img/w1200/02.webp 1200w, img/w1800/02.webp 1800w, img/02.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="2" width="2400" height="849" alt="Introduction — About Aastha" decoding="async" draggable="false">
       <a class="hot" href="https://www.linkedin.com/in/aastha-rajput-44491b2b2" target="_blank" rel="noopener" style="left:74.2%;top:93.6%;width:13.4%;height:5.0%" aria-label="LinkedIn" data-cur="link" data-label="Open"></a>
       <a class="hot" href="mailto:astha.rajput@nift.ac.in" data-copy="astha.rajput@nift.ac.in" style="left:88.4%;top:93.6%;width:10.0%;height:2.6%" aria-label="Email astha.rajput@nift.ac.in" data-cur="link" data-label="Copy"></a>
       <a class="hot" href="mailto:aastharajput184@gmail.com" data-copy="aastharajput184@gmail.com" style="left:88.4%;top:96.2%;width:10.0%;height:2.6%" aria-label="Email aastharajput184@gmail.com" data-cur="link" data-label="Copy"></a>
@@ -874,12 +909,12 @@ html.reduced .sc-pin{position:relative;height:100vh}
     <div class="frame"><div class="art toc">
       <h2 class="toc-word" aria-label="Contents"><span style="--j:0">C</span><span style="--j:1">O</span><span style="--j:2">N</span><span style="--j:3">T</span><span style="--j:4">E</span><span style="--j:5">N</span><span style="--j:6">T</span><span style="--j:7">S</span></h2>
       <p class="toc-note">Seven projects · tap a stamp to open it</p>
-      <ol class="toc-list"><li style="--i:0;--r:-4deg"><a class="stamp" href="#p4" data-go="4" data-cur="btn" data-label="Open" aria-label="01 Unbuilt — Surface design · home textiles"><span class="stamp-img"><img src="img/toc/unbuilt.webp" alt="" width="420" height="420" decoding="async"></span><svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm0" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs><circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/><text><textPath href="#pm0" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text><text class="pm-n" x="60" y="68" text-anchor="middle">01</text></svg><span class="stamp-meta"><b>01</b><span class="stamp-name">Unbuilt</span><em>Surface design · home textiles</em></span></a></li><li style="--i:1;--r:3deg"><a class="stamp" href="#p12" data-go="12" data-cur="btn" data-label="Open" aria-label="02 Fables of Mithila — Print design · Madhubani narratives"><span class="stamp-img"><img src="img/toc/fables.webp" alt="" width="420" height="420" decoding="async"></span><svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm1" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs><circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/><text><textPath href="#pm1" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text><text class="pm-n" x="60" y="68" text-anchor="middle">02</text></svg><span class="stamp-meta"><b>02</b><span class="stamp-name">Fables of Mithila</span><em>Print design · Madhubani narratives</em></span></a></li><li style="--i:2;--r:-2deg"><a class="stamp" href="#p19" data-go="19" data-cur="btn" data-label="Open" aria-label="03 Saandra — Print design · Rajasthani geometry"><span class="stamp-img"><img src="img/toc/saandra.webp" alt="" width="420" height="420" decoding="async"></span><svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm2" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs><circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/><text><textPath href="#pm2" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text><text class="pm-n" x="60" y="68" text-anchor="middle">03</text></svg><span class="stamp-meta"><b>03</b><span class="stamp-name">Saandra</span><em>Print design · Rajasthani geometry</em></span></a></li><li style="--i:3;--r:5deg"><a class="stamp" href="#p25" data-go="25" data-cur="btn" data-label="Open" aria-label="04 Seed Scriptures — Print design · the pomegranate"><span class="stamp-img"><img src="img/toc/seed.webp" alt="" width="420" height="420" decoding="async"></span><svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm3" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs><circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/><text><textPath href="#pm3" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text><text class="pm-n" x="60" y="68" text-anchor="middle">04</text></svg><span class="stamp-meta"><b>04</b><span class="stamp-name">Seed Scriptures</span><em>Print design · the pomegranate</em></span></a></li><li style="--i:4;--r:-3deg"><a class="stamp" href="#p33" data-go="33" data-cur="btn" data-label="Open" aria-label="05 Roundup — Woven mufflers"><span class="stamp-img"><img src="img/toc/roundup.webp" alt="" width="420" height="420" decoding="async"></span><svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm4" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs><circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/><text><textPath href="#pm4" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text><text class="pm-n" x="60" y="68" text-anchor="middle">05</text></svg><span class="stamp-meta"><b>05</b><span class="stamp-name">Roundup</span><em>Woven mufflers</em></span></a></li><li style="--i:5;--r:4deg"><a class="stamp" href="#p37" data-go="37" data-cur="btn" data-label="Open" aria-label="06 Kargha — Woven waist belt"><span class="stamp-img"><img src="img/toc/kargha.webp" alt="" width="420" height="420" decoding="async"></span><svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm5" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs><circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/><text><textPath href="#pm5" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text><text class="pm-n" x="60" y="68" text-anchor="middle">06</text></svg><span class="stamp-meta"><b>06</b><span class="stamp-name">Kargha</span><em>Woven waist belt</em></span></a></li><li style="--i:6;--r:-5deg"><a class="stamp" href="#p40" data-go="40" data-cur="btn" data-label="Open" aria-label="07 Baandh — Tie &amp; dye"><span class="stamp-img"><img src="img/toc/baandh.webp" alt="" width="420" height="420" decoding="async"></span><svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm6" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs><circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/><text><textPath href="#pm6" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text><text class="pm-n" x="60" y="68" text-anchor="middle">07</text></svg><span class="stamp-meta"><b>07</b><span class="stamp-name">Baandh</span><em>Tie &amp; dye</em></span></a></li></ol>
+      <ol class="toc-list"><li style="--i:0;--r:-4deg"><a class="stamp" href="#p4" data-go="4" data-cur="btn" data-label="Open" aria-label="01 Unbuilt — Surface design · home textiles"><span class="stamp-img"><img src="img/toc/unbuilt.webp" alt="" width="300" height="300" loading="lazy" decoding="async"></span><svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm0" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs><circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/><text><textPath href="#pm0" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text><text class="pm-n" x="60" y="68" text-anchor="middle">01</text></svg><span class="stamp-meta"><b>01</b><span class="stamp-name">Unbuilt</span><em>Surface design · home textiles</em></span></a></li><li style="--i:1;--r:3deg"><a class="stamp" href="#p12" data-go="12" data-cur="btn" data-label="Open" aria-label="02 Fables of Mithila — Print design · Madhubani narratives"><span class="stamp-img"><img src="img/toc/fables.webp" alt="" width="300" height="300" loading="lazy" decoding="async"></span><svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm1" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs><circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/><text><textPath href="#pm1" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text><text class="pm-n" x="60" y="68" text-anchor="middle">02</text></svg><span class="stamp-meta"><b>02</b><span class="stamp-name">Fables of Mithila</span><em>Print design · Madhubani narratives</em></span></a></li><li style="--i:2;--r:-2deg"><a class="stamp" href="#p19" data-go="19" data-cur="btn" data-label="Open" aria-label="03 Saandra — Print design · Rajasthani geometry"><span class="stamp-img"><img src="img/toc/saandra.webp" alt="" width="300" height="300" loading="lazy" decoding="async"></span><svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm2" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs><circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/><text><textPath href="#pm2" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text><text class="pm-n" x="60" y="68" text-anchor="middle">03</text></svg><span class="stamp-meta"><b>03</b><span class="stamp-name">Saandra</span><em>Print design · Rajasthani geometry</em></span></a></li><li style="--i:3;--r:5deg"><a class="stamp" href="#p25" data-go="25" data-cur="btn" data-label="Open" aria-label="04 Seed Scriptures — Print design · the pomegranate"><span class="stamp-img"><img src="img/toc/seed.webp" alt="" width="300" height="300" loading="lazy" decoding="async"></span><svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm3" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs><circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/><text><textPath href="#pm3" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text><text class="pm-n" x="60" y="68" text-anchor="middle">04</text></svg><span class="stamp-meta"><b>04</b><span class="stamp-name">Seed Scriptures</span><em>Print design · the pomegranate</em></span></a></li><li style="--i:4;--r:-3deg"><a class="stamp" href="#p33" data-go="33" data-cur="btn" data-label="Open" aria-label="05 Roundup — Woven mufflers"><span class="stamp-img"><img src="img/toc/roundup.webp" alt="" width="300" height="300" loading="lazy" decoding="async"></span><svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm4" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs><circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/><text><textPath href="#pm4" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text><text class="pm-n" x="60" y="68" text-anchor="middle">05</text></svg><span class="stamp-meta"><b>05</b><span class="stamp-name">Roundup</span><em>Woven mufflers</em></span></a></li><li style="--i:5;--r:4deg"><a class="stamp" href="#p37" data-go="37" data-cur="btn" data-label="Open" aria-label="06 Kargha — Woven waist belt"><span class="stamp-img"><img src="img/toc/kargha.webp" alt="" width="300" height="300" loading="lazy" decoding="async"></span><svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm5" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs><circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/><text><textPath href="#pm5" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text><text class="pm-n" x="60" y="68" text-anchor="middle">06</text></svg><span class="stamp-meta"><b>06</b><span class="stamp-name">Kargha</span><em>Woven waist belt</em></span></a></li><li style="--i:6;--r:-5deg"><a class="stamp" href="#p40" data-go="40" data-cur="btn" data-label="Open" aria-label="07 Baandh — Tie &amp; dye"><span class="stamp-img"><img src="img/toc/baandh.webp" alt="" width="300" height="300" loading="lazy" decoding="async"></span><svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm6" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs><circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/><text><textPath href="#pm6" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text><text class="pm-n" x="60" y="68" text-anchor="middle">07</text></svg><span class="stamp-meta"><b>07</b><span class="stamp-name">Baandh</span><em>Tie &amp; dye</em></span></a></li></ol>
     </div></div>
   </section>
   <section class="pg ch-start" id="p4" data-i="4" data-x="1" aria-label="Page 4 of 44: Unbuilt, Title">
     <div class="frame"><div class="art">
-      <img src="img/04.webp" srcset="img/04.webp 2400w, img/xl/04.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="4" width="2400" height="849" alt="Unbuilt — Title" loading="lazy" decoding="async" draggable="false">
+      <img src="img/04.webp" srcset="img/w1200/04.webp 1200w, img/w1800/04.webp 1800w, img/04.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="4" width="2400" height="849" alt="Unbuilt — Title" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="case" data-after="4" data-title="Case study" aria-label="Unbuilt — case study">
@@ -902,27 +937,27 @@ html.reduced .sc-pin{position:relative;height:100vh}
   </section>
   <section class="pg" id="p5" data-i="5" data-x="0" aria-label="Page 5 of 44: Unbuilt, Brand study &amp; moodboard">
     <div class="frame"><div class="art">
-      <img src="img/05.webp" srcset="img/05.webp 2400w, img/xl/05.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="5" width="2400" height="849" alt="Unbuilt — Brand study &amp; moodboard" loading="lazy" decoding="async" draggable="false">
+      <img src="img/05.webp" srcset="img/w1200/05.webp 1200w, img/w1800/05.webp 1800w, img/05.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="5" width="2400" height="849" alt="Unbuilt — Brand study &amp; moodboard" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p6" data-i="6" data-x="0" aria-label="Page 6 of 44: Unbuilt, Inspiration &amp; colour board">
     <div class="frame"><div class="art">
-      <img src="img/06.webp" srcset="img/06.webp 2400w, img/xl/06.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="6" width="2400" height="849" alt="Unbuilt — Inspiration &amp; colour board" loading="lazy" decoding="async" draggable="false">
+      <img src="img/06.webp" srcset="img/w1200/06.webp 1200w, img/w1800/06.webp 1800w, img/06.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="6" width="2400" height="849" alt="Unbuilt — Inspiration &amp; colour board" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p7" data-i="7" data-x="0" aria-label="Page 7 of 44: Unbuilt, Motif development">
     <div class="frame"><div class="art">
-      <img src="img/07.webp" srcset="img/07.webp 2400w, img/xl/07.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="7" width="2400" height="849" alt="Unbuilt — Motif development" loading="lazy" decoding="async" draggable="false">
+      <img src="img/07.webp" srcset="img/w1200/07.webp 1200w, img/w1800/07.webp 1800w, img/07.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="7" width="2400" height="849" alt="Unbuilt — Motif development" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p8" data-i="8" data-x="0" aria-label="Page 8 of 44: Unbuilt, Print development">
     <div class="frame"><div class="art">
-      <img src="img/08.webp" srcset="img/08.webp 2400w, img/xl/08.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="8" width="2400" height="849" alt="Unbuilt — Print development" loading="lazy" decoding="async" draggable="false">
+      <img src="img/08.webp" srcset="img/w1200/08.webp 1200w, img/w1800/08.webp 1800w, img/08.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="8" width="2400" height="849" alt="Unbuilt — Print development" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p9" data-i="9" data-x="0" aria-label="Page 9 of 44: Unbuilt, Print development">
     <div class="frame"><div class="art">
-      <img src="img/09.webp" srcset="img/09.webp 2400w, img/xl/09.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="9" width="2400" height="849" alt="Unbuilt — Print development" loading="lazy" decoding="async" draggable="false">
+      <img src="img/09.webp" srcset="img/w1200/09.webp 1200w, img/w1800/09.webp 1800w, img/09.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="9" width="2400" height="849" alt="Unbuilt — Print development" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="lib lib--prints" data-after="9" data-title="Print library" aria-label="Unbuilt — Print library">
@@ -931,17 +966,17 @@ html.reduced .sc-pin{position:relative;height:100vh}
   </section>
   <section class="pg" id="p10" data-i="10" data-x="0" aria-label="Page 10 of 44: Unbuilt, Home textiles in use">
     <div class="frame"><div class="art">
-      <img src="img/10.webp" srcset="img/10.webp 2400w, img/xl/10.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="10" width="2400" height="849" alt="Unbuilt — Home textiles in use" loading="lazy" decoding="async" draggable="false">
+      <img src="img/10.webp" srcset="img/w1200/10.webp 1200w, img/w1800/10.webp 1800w, img/10.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="10" width="2400" height="849" alt="Unbuilt — Home textiles in use" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p11" data-i="11" data-x="0" aria-label="Page 11 of 44: Unbuilt, Home textiles in use">
     <div class="frame"><div class="art">
-      <img src="img/11.webp" srcset="img/11.webp 2400w, img/xl/11.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="11" width="2400" height="849" alt="Unbuilt — Home textiles in use" loading="lazy" decoding="async" draggable="false">
+      <img src="img/11.webp" srcset="img/w1200/11.webp 1200w, img/w1800/11.webp 1800w, img/11.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="11" width="2400" height="849" alt="Unbuilt — Home textiles in use" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg ch-start" id="p12" data-i="12" data-x="1" aria-label="Page 12 of 44: Fables of Mithila, Title">
     <div class="frame"><div class="art">
-      <img src="img/12.webp" srcset="img/12.webp 2400w, img/xl/12.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="12" width="2400" height="849" alt="Fables of Mithila — Title" loading="lazy" decoding="async" draggable="false">
+      <img src="img/12.webp" srcset="img/w1200/12.webp 1200w, img/w1800/12.webp 1800w, img/12.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="12" width="2400" height="849" alt="Fables of Mithila — Title" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="case" data-after="12" data-title="Case study" aria-label="Fables of Mithila — case study">
@@ -964,32 +999,32 @@ html.reduced .sc-pin{position:relative;height:100vh}
   </section>
   <section class="pg" id="p13" data-i="13" data-x="0" aria-label="Page 13 of 44: Fables of Mithila, Concept &amp; inspiration">
     <div class="frame"><div class="art">
-      <img src="img/13.webp" srcset="img/13.webp 2400w, img/xl/13.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="13" width="2400" height="849" alt="Fables of Mithila — Concept &amp; inspiration" loading="lazy" decoding="async" draggable="false">
+      <img src="img/13.webp" srcset="img/w1200/13.webp 1200w, img/w1800/13.webp 1800w, img/13.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="13" width="2400" height="849" alt="Fables of Mithila — Concept &amp; inspiration" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p14" data-i="14" data-x="0" aria-label="Page 14 of 44: Fables of Mithila, Design process &amp; palette">
     <div class="frame"><div class="art">
-      <img src="img/14.webp" srcset="img/14.webp 2400w, img/xl/14.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="14" width="2400" height="849" alt="Fables of Mithila — Design process &amp; palette" loading="lazy" decoding="async" draggable="false">
+      <img src="img/14.webp" srcset="img/w1200/14.webp 1200w, img/w1800/14.webp 1800w, img/14.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="14" width="2400" height="849" alt="Fables of Mithila — Design process &amp; palette" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p15" data-i="15" data-x="0" aria-label="Page 15 of 44: Fables of Mithila, Motif development">
     <div class="frame"><div class="art">
-      <img src="img/15.webp" srcset="img/15.webp 2400w, img/xl/15.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="15" width="2400" height="849" alt="Fables of Mithila — Motif development" loading="lazy" decoding="async" draggable="false">
+      <img src="img/15.webp" srcset="img/w1200/15.webp 1200w, img/w1800/15.webp 1800w, img/15.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="15" width="2400" height="849" alt="Fables of Mithila — Motif development" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p16" data-i="16" data-x="0" aria-label="Page 16 of 44: Fables of Mithila, Print coordinates">
     <div class="frame"><div class="art">
-      <img src="img/16.webp" srcset="img/16.webp 2400w, img/xl/16.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="16" width="2400" height="849" alt="Fables of Mithila — Print coordinates" loading="lazy" decoding="async" draggable="false">
+      <img src="img/16.webp" srcset="img/w1200/16.webp 1200w, img/w1800/16.webp 1800w, img/16.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="16" width="2400" height="849" alt="Fables of Mithila — Print coordinates" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p17" data-i="17" data-x="0" aria-label="Page 17 of 44: Fables of Mithila, Print coordinates">
     <div class="frame"><div class="art">
-      <img src="img/17.webp" srcset="img/17.webp 2400w, img/xl/17.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="17" width="2400" height="849" alt="Fables of Mithila — Print coordinates" loading="lazy" decoding="async" draggable="false">
+      <img src="img/17.webp" srcset="img/w1200/17.webp 1200w, img/w1800/17.webp 1800w, img/17.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="17" width="2400" height="849" alt="Fables of Mithila — Print coordinates" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p18" data-i="18" data-x="0" aria-label="Page 18 of 44: Fables of Mithila, Print coordinates">
     <div class="frame"><div class="art">
-      <img src="img/18.webp" srcset="img/18.webp 2400w, img/xl/18.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="18" width="2400" height="849" alt="Fables of Mithila — Print coordinates" loading="lazy" decoding="async" draggable="false">
+      <img src="img/18.webp" srcset="img/w1200/18.webp 1200w, img/w1800/18.webp 1800w, img/18.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="18" width="2400" height="849" alt="Fables of Mithila — Print coordinates" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="lib lib--prints" data-after="18" data-title="Print library" aria-label="Fables of Mithila — Print library">
@@ -998,7 +1033,7 @@ html.reduced .sc-pin{position:relative;height:100vh}
   </section>
   <section class="pg ch-start" id="p19" data-i="19" data-x="1" aria-label="Page 19 of 44: Saandra, Title">
     <div class="frame"><div class="art">
-      <img src="img/19.webp" srcset="img/19.webp 2400w, img/xl/19.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="19" width="2400" height="849" alt="Saandra — Title" loading="lazy" decoding="async" draggable="false">
+      <img src="img/19.webp" srcset="img/w1200/19.webp 1200w, img/w1800/19.webp 1800w, img/19.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="19" width="2400" height="849" alt="Saandra — Title" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="case" data-after="19" data-title="Case study" aria-label="Saandra — case study">
@@ -1021,27 +1056,27 @@ html.reduced .sc-pin{position:relative;height:100vh}
   </section>
   <section class="pg" id="p20" data-i="20" data-x="0" aria-label="Page 20 of 44: Saandra, Concept note">
     <div class="frame"><div class="art">
-      <img src="img/20.webp" srcset="img/20.webp 2400w, img/xl/20.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="20" width="2400" height="849" alt="Saandra — Concept note" loading="lazy" decoding="async" draggable="false">
+      <img src="img/20.webp" srcset="img/w1200/20.webp 1200w, img/w1800/20.webp 1800w, img/20.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="20" width="2400" height="849" alt="Saandra — Concept note" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p21" data-i="21" data-x="0" aria-label="Page 21 of 44: Saandra, Moodboard &amp; client profile">
     <div class="frame"><div class="art">
-      <img src="img/21.webp" srcset="img/21.webp 2400w, img/xl/21.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="21" width="2400" height="849" alt="Saandra — Moodboard &amp; client profile" loading="lazy" decoding="async" draggable="false">
+      <img src="img/21.webp" srcset="img/w1200/21.webp 1200w, img/w1800/21.webp 1800w, img/21.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="21" width="2400" height="849" alt="Saandra — Moodboard &amp; client profile" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p22" data-i="22" data-x="0" aria-label="Page 22 of 44: Saandra, Motif development">
     <div class="frame"><div class="art">
-      <img src="img/22.webp" srcset="img/22.webp 2400w, img/xl/22.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="22" width="2400" height="849" alt="Saandra — Motif development" loading="lazy" decoding="async" draggable="false">
+      <img src="img/22.webp" srcset="img/w1200/22.webp 1200w, img/w1800/22.webp 1800w, img/22.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="22" width="2400" height="849" alt="Saandra — Motif development" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p23" data-i="23" data-x="0" aria-label="Page 23 of 44: Saandra, Print development">
     <div class="frame"><div class="art">
-      <img src="img/23.webp" srcset="img/23.webp 2400w, img/xl/23.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="23" width="2400" height="849" alt="Saandra — Print development" loading="lazy" decoding="async" draggable="false">
+      <img src="img/23.webp" srcset="img/w1200/23.webp 1200w, img/w1800/23.webp 1800w, img/23.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="23" width="2400" height="849" alt="Saandra — Print development" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p24" data-i="24" data-x="0" aria-label="Page 24 of 44: Saandra, Print development">
     <div class="frame"><div class="art">
-      <img src="img/24.webp" srcset="img/24.webp 2400w, img/xl/24.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="24" width="2400" height="849" alt="Saandra — Print development" loading="lazy" decoding="async" draggable="false">
+      <img src="img/24.webp" srcset="img/w1200/24.webp 1200w, img/w1800/24.webp 1800w, img/24.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="24" width="2400" height="849" alt="Saandra — Print development" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="lib lib--prints" data-after="24" data-title="Print library" aria-label="Saandra — Print library">
@@ -1060,7 +1095,7 @@ html.reduced .sc-pin{position:relative;height:100vh}
   </section>
   <section class="pg ch-start" id="p25" data-i="25" data-x="1" aria-label="Page 25 of 44: Seed Scriptures, Title">
     <div class="frame"><div class="art">
-      <img src="img/25.webp" srcset="img/25.webp 2400w, img/xl/25.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="25" width="2400" height="849" alt="Seed Scriptures — Title" loading="lazy" decoding="async" draggable="false">
+      <img src="img/25.webp" srcset="img/w1200/25.webp 1200w, img/w1800/25.webp 1800w, img/25.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="25" width="2400" height="849" alt="Seed Scriptures — Title" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="case" data-after="25" data-title="Case study" aria-label="Seed Scriptures — case study">
@@ -1083,37 +1118,37 @@ html.reduced .sc-pin{position:relative;height:100vh}
   </section>
   <section class="pg" id="p26" data-i="26" data-x="0" aria-label="Page 26 of 44: Seed Scriptures, Keywords &amp; design process">
     <div class="frame"><div class="art">
-      <img src="img/26.webp" srcset="img/26.webp 2400w, img/xl/26.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="26" width="2400" height="849" alt="Seed Scriptures — Keywords &amp; design process" loading="lazy" decoding="async" draggable="false">
+      <img src="img/26.webp" srcset="img/w1200/26.webp 1200w, img/w1800/26.webp 1800w, img/26.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="26" width="2400" height="849" alt="Seed Scriptures — Keywords &amp; design process" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p27" data-i="27" data-x="0" aria-label="Page 27 of 44: Seed Scriptures, Inspiration &amp; concept">
     <div class="frame"><div class="art">
-      <img src="img/27.webp" srcset="img/27.webp 2400w, img/xl/27.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="27" width="2400" height="849" alt="Seed Scriptures — Inspiration &amp; concept" loading="lazy" decoding="async" draggable="false">
+      <img src="img/27.webp" srcset="img/w1200/27.webp 1200w, img/w1800/27.webp 1800w, img/27.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="27" width="2400" height="849" alt="Seed Scriptures — Inspiration &amp; concept" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p28" data-i="28" data-x="0" aria-label="Page 28 of 44: Seed Scriptures, Colour forecast &amp; audience">
     <div class="frame"><div class="art">
-      <img src="img/28.webp" srcset="img/28.webp 2400w, img/xl/28.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="28" width="2400" height="849" alt="Seed Scriptures — Colour forecast &amp; audience" loading="lazy" decoding="async" draggable="false">
+      <img src="img/28.webp" srcset="img/w1200/28.webp 1200w, img/w1800/28.webp 1800w, img/28.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="28" width="2400" height="849" alt="Seed Scriptures — Colour forecast &amp; audience" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p29" data-i="29" data-x="0" aria-label="Page 29 of 44: Seed Scriptures, Motif generation">
     <div class="frame"><div class="art">
-      <img src="img/29.webp" srcset="img/29.webp 2400w, img/xl/29.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="29" width="2400" height="849" alt="Seed Scriptures — Motif generation" loading="lazy" decoding="async" draggable="false">
+      <img src="img/29.webp" srcset="img/w1200/29.webp 1200w, img/w1800/29.webp 1800w, img/29.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="29" width="2400" height="849" alt="Seed Scriptures — Motif generation" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p30" data-i="30" data-x="0" aria-label="Page 30 of 44: Seed Scriptures, Prints &amp; silhouettes">
     <div class="frame"><div class="art">
-      <img src="img/30.webp" srcset="img/30.webp 2400w, img/xl/30.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="30" width="2400" height="849" alt="Seed Scriptures — Prints &amp; silhouettes" loading="lazy" decoding="async" draggable="false">
+      <img src="img/30.webp" srcset="img/w1200/30.webp 1200w, img/w1800/30.webp 1800w, img/30.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="30" width="2400" height="849" alt="Seed Scriptures — Prints &amp; silhouettes" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p31" data-i="31" data-x="0" aria-label="Page 31 of 44: Seed Scriptures, Prints &amp; silhouettes">
     <div class="frame"><div class="art">
-      <img src="img/31.webp" srcset="img/31.webp 2400w, img/xl/31.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="31" width="2400" height="849" alt="Seed Scriptures — Prints &amp; silhouettes" loading="lazy" decoding="async" draggable="false">
+      <img src="img/31.webp" srcset="img/w1200/31.webp 1200w, img/w1800/31.webp 1800w, img/31.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="31" width="2400" height="849" alt="Seed Scriptures — Prints &amp; silhouettes" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p32" data-i="32" data-x="0" aria-label="Page 32 of 44: Seed Scriptures, Final line-up">
     <div class="frame"><div class="art">
-      <img src="img/32.webp" srcset="img/32.webp 2400w, img/xl/32.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="32" width="2400" height="849" alt="Seed Scriptures — Final line-up" loading="lazy" decoding="async" draggable="false">
+      <img src="img/32.webp" srcset="img/w1200/32.webp 1200w, img/w1800/32.webp 1800w, img/32.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="32" width="2400" height="849" alt="Seed Scriptures — Final line-up" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="lib lib--prints" data-after="32" data-title="Print library" aria-label="Seed Scriptures — Print library">
@@ -1122,7 +1157,7 @@ html.reduced .sc-pin{position:relative;height:100vh}
   </section>
   <section class="pg ch-start" id="p33" data-i="33" data-x="1" aria-label="Page 33 of 44: Roundup, Title">
     <div class="frame"><div class="art">
-      <img src="img/33.webp" srcset="img/33.webp 2400w, img/xl/33.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="33" width="2400" height="849" alt="Roundup — Title" loading="lazy" decoding="async" draggable="false">
+      <img src="img/33.webp" srcset="img/w1200/33.webp 1200w, img/w1800/33.webp 1800w, img/33.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="33" width="2400" height="849" alt="Roundup — Title" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="case" data-after="33" data-title="Case study" aria-label="Roundup — case study">
@@ -1145,17 +1180,17 @@ html.reduced .sc-pin{position:relative;height:100vh}
   </section>
   <section class="pg" id="p34" data-i="34" data-x="0" aria-label="Page 34 of 44: Roundup, Concept &amp; palette">
     <div class="frame"><div class="art">
-      <img src="img/34.webp" srcset="img/34.webp 2400w, img/xl/34.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="34" width="2400" height="849" alt="Roundup — Concept &amp; palette" loading="lazy" decoding="async" draggable="false">
+      <img src="img/34.webp" srcset="img/w1200/34.webp 1200w, img/w1800/34.webp 1800w, img/34.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="34" width="2400" height="849" alt="Roundup — Concept &amp; palette" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p35" data-i="35" data-x="0" aria-label="Page 35 of 44: Roundup, Muffler 1 — weave drafts">
     <div class="frame"><div class="art">
-      <img src="img/35.webp" srcset="img/35.webp 2400w, img/xl/35.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="35" width="2400" height="849" alt="Roundup — Muffler 1 — weave drafts" loading="lazy" decoding="async" draggable="false">
+      <img src="img/35.webp" srcset="img/w1200/35.webp 1200w, img/w1800/35.webp 1800w, img/35.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="35" width="2400" height="849" alt="Roundup — Muffler 1 — weave drafts" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p36" data-i="36" data-x="0" aria-label="Page 36 of 44: Roundup, Muffler 2 — weave drafts">
     <div class="frame"><div class="art">
-      <img src="img/36.webp" srcset="img/36.webp 2400w, img/xl/36.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="36" width="2400" height="849" alt="Roundup — Muffler 2 — weave drafts" loading="lazy" decoding="async" draggable="false">
+      <img src="img/36.webp" srcset="img/w1200/36.webp 1200w, img/w1800/36.webp 1800w, img/36.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="36" width="2400" height="849" alt="Roundup — Muffler 2 — weave drafts" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="lib lib--shoot" data-after="36" data-title="The shoot" aria-label="Roundup — The shoot">
@@ -1164,7 +1199,7 @@ html.reduced .sc-pin{position:relative;height:100vh}
   </section>
   <section class="pg ch-start" id="p37" data-i="37" data-x="1" aria-label="Page 37 of 44: Kargha, Title">
     <div class="frame"><div class="art">
-      <img src="img/38.webp" srcset="img/38.webp 2400w, img/xl/38.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="38" width="2400" height="849" alt="Kargha — Title" loading="lazy" decoding="async" draggable="false">
+      <img src="img/38.webp" srcset="img/w1200/38.webp 1200w, img/w1800/38.webp 1800w, img/38.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="38" width="2400" height="849" alt="Kargha — Title" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="case" data-after="37" data-title="Case study" aria-label="Kargha — case study">
@@ -1187,17 +1222,17 @@ html.reduced .sc-pin{position:relative;height:100vh}
   </section>
   <section class="pg" id="p38" data-i="38" data-x="0" aria-label="Page 38 of 44: Kargha, Concept, texture &amp; material">
     <div class="frame"><div class="art">
-      <img src="img/39.webp" srcset="img/39.webp 2400w, img/xl/39.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="39" width="2400" height="849" alt="Kargha — Concept, texture &amp; material" loading="lazy" decoding="async" draggable="false">
+      <img src="img/39.webp" srcset="img/w1200/39.webp 1200w, img/w1800/39.webp 1800w, img/39.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="39" width="2400" height="849" alt="Kargha — Concept, texture &amp; material" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p39" data-i="39" data-x="0" aria-label="Page 39 of 44: Kargha, Motifs &amp; colourways">
     <div class="frame"><div class="art">
-      <img src="img/40.webp" srcset="img/40.webp 2400w, img/xl/40.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="40" width="2400" height="849" alt="Kargha — Motifs &amp; colourways" loading="lazy" decoding="async" draggable="false">
+      <img src="img/40.webp" srcset="img/w1200/40.webp 1200w, img/w1800/40.webp 1800w, img/40.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="40" width="2400" height="849" alt="Kargha — Motifs &amp; colourways" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg ch-start" id="p40" data-i="40" data-x="1" aria-label="Page 40 of 44: Baandh, Title">
     <div class="frame"><div class="art">
-      <img src="img/41.webp" srcset="img/41.webp 2400w, img/xl/41.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="41" width="2400" height="849" alt="Baandh — Title" loading="lazy" decoding="async" draggable="false">
+      <img src="img/41.webp" srcset="img/w1200/41.webp 1200w, img/w1800/41.webp 1800w, img/41.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="41" width="2400" height="849" alt="Baandh — Title" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="case" data-after="40" data-title="Case study" aria-label="Baandh — case study">
@@ -1220,22 +1255,22 @@ html.reduced .sc-pin{position:relative;height:100vh}
   </section>
   <section class="pg" id="p41" data-i="41" data-x="0" aria-label="Page 41 of 44: Baandh, Tie &amp; dye samples">
     <div class="frame"><div class="art">
-      <img src="img/42.webp" srcset="img/42.webp 2400w, img/xl/42.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="42" width="2400" height="849" alt="Baandh — Tie &amp; dye samples" loading="lazy" decoding="async" draggable="false">
+      <img src="img/42.webp" srcset="img/w1200/42.webp 1200w, img/w1800/42.webp 1800w, img/42.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="42" width="2400" height="849" alt="Baandh — Tie &amp; dye samples" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p42" data-i="42" data-x="0" aria-label="Page 42 of 44: Baandh, Tie &amp; dye samples">
     <div class="frame"><div class="art">
-      <img src="img/43.webp" srcset="img/43.webp 2400w, img/xl/43.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="43" width="2400" height="849" alt="Baandh — Tie &amp; dye samples" loading="lazy" decoding="async" draggable="false">
+      <img src="img/43.webp" srcset="img/w1200/43.webp 1200w, img/w1800/43.webp 1800w, img/43.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="43" width="2400" height="849" alt="Baandh — Tie &amp; dye samples" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg" id="p43" data-i="43" data-x="0" aria-label="Page 43 of 44: Baandh, Cushion collection">
     <div class="frame"><div class="art">
-      <img src="img/44.webp" srcset="img/44.webp 2400w, img/xl/44.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="44" width="2400" height="849" alt="Baandh — Cushion collection" loading="lazy" decoding="async" draggable="false">
+      <img src="img/44.webp" srcset="img/w1200/44.webp 1200w, img/w1800/44.webp 1800w, img/44.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="44" width="2400" height="849" alt="Baandh — Cushion collection" loading="lazy" decoding="async" draggable="false">
     </div></div>
   </section>
   <section class="pg ch-start pg-last" id="p44" data-i="44" data-x="0.82" aria-label="Page 44 of 44: Thank you, Thank you">
     <div class="frame"><div class="art">
-      <img src="img/45.webp" srcset="img/45.webp 2400w, img/xl/45.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="45" width="2400" height="849" alt="Thank you — Thank you" loading="lazy" decoding="async" draggable="false">
+      <img src="img/45.webp" srcset="img/w1200/45.webp 1200w, img/w1800/45.webp 1800w, img/45.webp 2400w" sizes="(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))" data-n="45" width="2400" height="849" alt="Thank you — Thank you" loading="lazy" decoding="async" draggable="false">
       <a class="hot" href="mailto:aastharajput184@gmail.com" data-copy="aastharajput184@gmail.com" style="left:74.6%;top:83.2%;width:23.0%;height:6.4%" aria-label="Email aastharajput184@gmail.com" data-cur="link" data-label="Copy"></a>
       <a class="hot" href="https://www.behance.net/ARa0953289" target="_blank" rel="noopener" style="left:74.6%;top:90.8%;width:13.8%;height:6.4%" aria-label="Behance" data-cur="link" data-label="Open"></a>
     </div></div>
@@ -1266,6 +1301,14 @@ html.reduced .sc-pin{position:relative;height:100vh}
   </section>
   <div class="end"><button id="totop" type="button" data-cur="btn" data-mag>Back to top <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5"/></svg></button></div>
 </main>
+
+<div id="pv" role="dialog" aria-modal="true" aria-label="Page reader" aria-hidden="true">
+  <div class="pv-top"><span class="pv-t" id="pvT"></span><span class="pv-n" id="pvN"></span><button class="pv-btn" id="pvClose" type="button">Close</button></div>
+  <div class="pv-s" id="pvS"><img id="pvImg" alt="" draggable="false"></div>
+  <div class="pv-bot"><button class="pv-btn" id="pvPrev" type="button" aria-label="Previous page"><svg viewBox="0 0 16 16"><path d="M10 3 5 8l5 5"/></svg></button>
+    <span class="pv-hint" id="pvHint">Swipe across to read · double-tap to zoom</span>
+    <button class="pv-btn" id="pvNext" type="button" aria-label="Next page"><svg viewBox="0 0 16 16"><path d="m6 3 5 5-5 5"/></svg></button></div>
+</div>
 
 <div id="ct" role="dialog" aria-modal="true" aria-labelledby="ctCardName" aria-hidden="true">
   <div class="ct-scrim"></div>
@@ -1361,9 +1404,8 @@ var isTitle=secs.map(function(s){return s.classList.contains("ch-start")&&!s.cla
 var toc=$(".pg-toc");
 var tops=[], hs=[], cur=0, ready=false, idxOpen=false, portrait=false;
 
-function layout(){portrait=mqP.matches;root.classList.toggle("portrait",portrait);measure();if(portrait)startRows()}
+function layout(){portrait=mqP.matches;root.classList.toggle("portrait",portrait);measure()}
 function measure(){var y=pageYOffset;tops=secs.map(function(s){return s.getBoundingClientRect().top+y});hs=secs.map(function(s){return s.offsetHeight});if(SC)SC.measure()}
-function startRows(){secs.forEach(function(s){var x=+s.dataset.x||0;s.scrollLeft=(s.scrollWidth-s.clientWidth)*x})}
 function maxY(){return document.documentElement.scrollHeight-innerHeight}
 layout();
 
@@ -1378,7 +1420,7 @@ var first=secs.slice(0,2).map(function(s){return $("img",s)});
 function progress(){target=Math.max(target,first.filter(function(im){return im.complete&&im.naturalWidth}).length/first.length*100)}
 first.forEach(function(im){im.addEventListener("load",progress);im.addEventListener("error",progress)});
 progress();
-var minShow=reduced?0:1700;
+var minShow=reduced?0:(ss("seen")?350:1300);   /* returning in the same session: barely pause */
 (function count(){
   shown+=(target-shown)*0.1+0.3; if(shown>target)shown=target;
   lcount.textContent=pad(Math.min(99,Math.round(shown))); lline.style.width=shown+"%";
@@ -1389,13 +1431,13 @@ var minShow=reduced?0:1700;
 function start(){
   if(ready)return; ready=true;
   var L=$("#loader"); L.classList.add("out"); setTimeout(function(){L.remove()},reduced?0:1500);
-  root.classList.remove("loading"); placeStitch();
+  root.classList.remove("loading"); placeStitch(); ss("seen","1");
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(placeStitch);
   measure();
   var m=/^#p(\d+)$/.exec(location.hash), n=m?clamp(+m[1],1,N):1;
   if(n>1)goTo(n,true);
   onScroll(true);
-  if(portrait&&!ss("swiped"))setTimeout(function(){toast("Swipe sideways to read each page · hold to magnify",4200)},1600);
+  if(portrait&&!ss("pvseen"))setTimeout(function(){toast("Tap any page to read it full-screen",3800)},1600);
 }
 
 /* ---------- smooth scrolling (mouse & trackpad) + gliding page jumps ---------- */
@@ -1425,7 +1467,6 @@ function normDelta(e){return e.deltaY*(e.deltaMode===1?32:e.deltaMode===2?innerH
 
 function targetFor(i){
   if(i<=1)return 0;
-  if(portrait)return tops[i-1];
   return tops[i-1]+hs[i-1]/2-innerHeight/2;   /* centre the page on screen */
 }
 function goTo(i,instant,scenic){
@@ -1497,6 +1538,7 @@ addEventListener("scroll",function(){onScroll()},{passive:true});
 /* ---------- gentle zoom on every page + parallax on project title pages ---------- */
 var fxState=[];
 function fx(){
+  if(portrait)return;                       /* phones show each page whole — nothing zooms or crops */
   var vh=innerHeight, y=pageYOffset, mid=y+vh/2;
   for(var k=0;k<secs.length;k++){
     var top=tops[k], h=hs[k];
@@ -1666,6 +1708,56 @@ if(fine&&!reduced)$$(".ix-thumb",ix).forEach(function(t){
   }
 })();
 
+/* ---------- phone page reader ---------- */
+(function(){
+  var pv=$("#pv"), sc=$("#pvS"), im=$("#pvImg"), at=0, open=false, pushed=false, lastTap=0;
+  var pages=secs.filter(function(s){return !s.classList.contains("pg-toc")&&$("img[data-n]",s)});
+  function srcN(s){return +$("img[data-n]",s).dataset.n}
+  function show(k,keepZoom){
+    at=clamp(k,0,pages.length-1); var s=pages[at], n=srcN(s), i=+s.dataset.i, ch=chapterOf(i);
+    sc.classList.remove("z");
+    im.onload=null; im.src=std(n);
+    var x=+s.dataset.x||0;
+    im.onload=function(){sc.scrollLeft=(sc.scrollWidth-sc.clientWidth)*x;sc.scrollTop=0;
+      var big=new Image(); big.onload=function(){if(pages[at]===s)im.src=big.src}; big.src=xl(n)};   /* sharpen with the large file */
+    $("#pvT").innerHTML=esc(ch.title)+(P[i-1]&&P[i-1]!==ch.title?"<small>"+esc(P[i-1])+"</small>":"");
+    $("#pvN").textContent=pad(i)+" / "+pad(N);
+    $("#pvPrev").disabled=at===0; $("#pvNext").disabled=at===pages.length-1;
+    if(!open)return; goTo(i,true);
+  }
+  function esc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+  function openPv(s){
+    open=true; show(pages.indexOf(s)); pv.classList.add("on"); pv.setAttribute("aria-hidden","false"); root.classList.add("pv-open"); ss("pvseen","1");
+    try{history.pushState({pv:1},"");pushed=true}catch(_){}
+  }
+  function closePv(fromPop){
+    if(!open)return; open=false; pv.classList.remove("on"); pv.setAttribute("aria-hidden","true"); root.classList.remove("pv-open");
+    var s=pages[at]; if(s)goTo(+s.dataset.i,true);
+    if(pushed&&!fromPop){pushed=false;try{history.back()}catch(_){}}
+  }
+  addEventListener("popstate",function(){if(open){pushed=false;closePv(true)}});
+  document.addEventListener("click",function(e){
+    if(!portrait||open||!ready)return;
+    var s=e.target.closest(".pg"); if(!s||e.target.closest(".hot,a,button")||s.classList.contains("pg-toc"))return;
+    if(pages.indexOf(s)<0)return; e.preventDefault(); openPv(s);
+  });
+  $("#pvClose").addEventListener("click",function(){closePv()});
+  $("#pvPrev").addEventListener("click",function(){show(at-1)});
+  $("#pvNext").addEventListener("click",function(){show(at+1)});
+  addEventListener("keydown",function(e){if(!open)return;
+    if(e.key==="Escape"){e.stopImmediatePropagation();closePv()} else if(e.key==="ArrowRight"){e.stopImmediatePropagation();show(at+1)} else if(e.key==="ArrowLeft"){e.stopImmediatePropagation();show(at-1)}},true);
+  // double-tap: zoom in to 2x on the spot that was tapped, double-tap again to zoom out
+  sc.addEventListener("click",function(e){
+    var now=Date.now(); if(now-lastTap>320){lastTap=now;return} lastTap=0;
+    var r=im.getBoundingClientRect(), fx_=(e.clientX-r.left)/r.width, fy_=(e.clientY-r.top)/r.height, z=!sc.classList.contains("z");
+    sc.classList.toggle("z",z);
+    var r2=im.getBoundingClientRect();
+    sc.scrollLeft+= (r2.left+fx_*r2.width)-e.clientX; sc.scrollTop+= (r2.top+fy_*r2.height)-e.clientY;
+    $("#pvHint").textContent=z?"Drag to look around · double-tap to zoom out":"Swipe across to read · double-tap to zoom";
+  });
+  window.__pvOpen=function(){return open};
+})();
+
 /* ---------- contact card ---------- */
 var ct=$("#ct"), ctBtn=$("#ctBtn"), ctOpen=false;
 function openContact(){if(ctOpen)return;if(idxOpen)closeIndex();ctOpen=true;loupeOn=false;ct.classList.add("on");ct.setAttribute("aria-hidden","false");
@@ -1823,7 +1915,6 @@ if(fine){
   document.addEventListener("touchend",endHold);
   document.addEventListener("touchcancel",endHold);
   document.addEventListener("contextmenu",function(e){if(e.target.closest(".pg"))e.preventDefault()});
-  secs.forEach(function(s){s.addEventListener("scroll",function(){ss("swiped","1")},{passive:true,once:true})});
   (function tick(){paintLoupe(); if(!reduced)fx(); if(SC)SC.frame(pageYOffset,innerHeight,reduced); if(ST)ST.frame(pageYOffset,innerHeight); requestAnimationFrame(tick)})();
 }
 

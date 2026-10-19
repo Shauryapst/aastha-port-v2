@@ -68,4 +68,5 @@ STRAIGHT DRAFT (p36), GEOMETRY (p39). Re-run it after replacing the slide images
 - Contact: a Contact button in the top bar opens a card (copy email, LinkedIn, Behance); full contact + about section after the last page.
 - Pages left out: `SKIP` in `_edit/build.py` (37, the shoot collage, duplicates the Shoot grid). The site renumbers itself (44 pages); image files keep their Canva numbers.
 - Cover (page 1): her torn-fabric collage (`_edit/cover/cover-src.webp`; old cover kept in `_edit/cover/`). The lettering writes itself in (lettering-free patches `img/cover/t*.webp` wiped away), two needles keep sewing along her gold and cream stitch lines (`_edit/cover/stitches.json`), a soft light sweeps the cloth, and the collage tilts toward the pointer / phone tilt.
-
+- Loading: every page comes in 1200 / 1800 / 2400 px (`img/w1200/`, `img/w1800/`, `img/`); the browser picks the smallest sharp one. `img/xl/` (4200 px) is only for the magnifier and the phone reader's zoom. Fonts load without blocking, scene artwork waits for the cover, decorative images are compressed, and `netlify.toml` caches images for 30 days.
+- Phones: every page shows whole, fitted to the width, with solid top/bottom bars. Tap a page to open the full-screen reader (swipe across, double-tap to zoom, arrows for next/previous, the phone's back button closes it).

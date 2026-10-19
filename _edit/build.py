@@ -129,7 +129,7 @@ def toc_html():
         items.append(
             f'<li style="--i:{k};--r:{TOC_TILT[k]}deg">'
             f'<a class="stamp" href="#p{start}" data-go="{start}" data-cur="btn" data-label="Open" aria-label="{k + 1:02d} {esc(title)} — {esc(sub)}">'
-            f'<span class="stamp-img"><img src="img/toc/{stamp}.webp" alt="" width="420" height="420" decoding="async"></span>'
+            f'<span class="stamp-img"><img src="img/toc/{stamp}.webp" alt="" width="300" height="300" loading="lazy" decoding="async"></span>'
             f'<svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm{k}" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs>'
             f'<circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/>'
             f'<text><textPath href="#pm{k}" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text>'
@@ -167,6 +167,12 @@ def cover_fx_html():
             f'<svg class="cv-sew" viewBox="0 0 {COVER_W} {COVER_H}" preserveAspectRatio="none">{paths}</svg></div>'
             f'<svg class="cv-needles" aria-hidden="true" viewBox="0 0 {COVER_W} {COVER_H}" preserveAspectRatio="none">{needle}{needle}</svg>')
 
+# Each page in three widths; the browser takes the smallest that is sharp on the screen.
+# (img/xl/ at 4200 px is only for the magnifier and the phone reader's zoom.)
+def SRCSET(n):
+    return f"img/w1200/{n:02d}.webp 1200w, img/w1800/{n:02d}.webp 1800w, img/{n:02d}.webp 2400w"
+SIZES = "(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))"
+
 def _after(html_list, n, i):
     """Extras are defined against Canva page numbers; point them at the site page they follow."""
     return [h.replace(f'data-after="{n}"', f'data-after="{i}"') for h in html_list]
@@ -200,7 +206,7 @@ for n in range(1, 46):
     sections.append(
 f'''  <section class="{cls}" id="p{i}" data-i="{i}" data-x="{x}" aria-label="Page {i} of {NP}: {esc(c[1])}, {esc(title)}">
     <div class="frame"><div class="art">
-      <img src="img/{n:02d}.webp" srcset="img/{n:02d}.webp 2400w, img/xl/{n:02d}.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="{n}" width="2400" height="849" alt="{esc(c[1])} — {esc(title)}"{' fetchpriority="high"' if n == 1 else ''}{'' if eager else ' loading="lazy"'} decoding="async" draggable="false">{hots}
+      <img src="img/{n:02d}.webp" srcset="{SRCSET(n)}" sizes="{SIZES}" data-n="{n}" width="2400" height="849" alt="{esc(c[1])} — {esc(title)}"{' fetchpriority="high"' if n == 1 else ''}{'' if eager else ' loading="lazy"'} decoding="async" draggable="false">{hots}
     </div></div>
   </section>''')
     sections.extend(_after(extras_after(n), n, i))
