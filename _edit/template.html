@@ -667,7 +667,7 @@ if(SC)SC.init(JSON.parse(document.getElementById("scene-data").textContent));
 var ST=window.Studios||null; if(ST)ST.init();
 
 var secs=$$(".pg"), frames=secs.map(function(s){return $(".frame",s)}), arts=secs.map(function(s){return $(".art",s)});
-var isTitle=secs.map(function(s){return s.classList.contains("ch-start")});
+var isTitle=secs.map(function(s){return s.classList.contains("ch-start")&&s.id!=="p45"});   /* the contact page never crops */
 var toc=$(".pg-toc");
 var tops=[], hs=[], cur=0, ready=false, idxOpen=false, portrait=false;
 
@@ -813,7 +813,7 @@ function fx(){
     if(top+h<y-80||top>y+vh+80){continue}
     var p=clamp((top+h/2-mid)/((vh+h)/2),-1,1), a=Math.abs(p);
     var fs=1-0.05*a*a;                                   /* card settles to full size at the centre */
-    var t=isTitle[k]?"translate3d(0,"+(-p*2.6).toFixed(3)+"%,0) scale(1.06)"   /* artwork drifts slower */
+    var t=isTitle[k]?"translate3d(0,"+(-p*1.2).toFixed(3)+"%,0) scale(1.025)"   /* artwork drifts slower */
                      :"scale("+(1+0.07*a).toFixed(4)+")";                       /* content settles from slightly enlarged */
     var key=fs.toFixed(4)+t;
     if(fxState[k]!==key){fxState[k]=key;frames[k].style.transform="scale("+fs.toFixed(4)+")";arts[k].style.transform=t}
