@@ -12,7 +12,7 @@ LINKEDIN = "https://www.linkedin.com/in/aastha-rajput-44491b2b2"
 
 # The live address once deployed (e.g. "https://aastha-rajput.netlify.app"), no trailing slash.
 # Fills in canonical / og:url / absolute share image and writes sitemap.xml. Leave "" until known.
-SITE_URL = ""
+SITE_URL = "https://aastha-rajput-portfolio.netlify.app"
 
 # Real text about Aastha — shown in the contact section and read by search engines
 ROLE = "Textile designer"
