@@ -10,6 +10,26 @@ NIFT = "astha.rajput@nift.ac.in"
 BEHANCE = "https://www.behance.net/ARa0953289"
 LINKEDIN = "https://www.linkedin.com/in/aastha-rajput-44491b2b2"
 
+# The live address once deployed (e.g. "https://aastha-rajput.netlify.app"), no trailing slash.
+# Fills in canonical / og:url / absolute share image and writes sitemap.xml. Leave "" until known.
+SITE_URL = ""
+
+# Real text about Aastha — shown in the contact section and read by search engines
+ROLE = "Textile designer"
+SCHOOL = "National Institute of Fashion Technology (NIFT), Srinagar"
+BIO = ("A textile design student interested in blending traditional crafts with modern aesthetics — "
+       "print and surface design, weaving and tie & dye, with a research-led process and an eye for photography.")
+EXPERIENCE = [
+    ("Internship — Fabindia", "Print design, fabric sourcing, silhouettes and surface ornamentation for women's ethnicwear; seasonal print concepts, khakas and embroidery directions."),
+    ("Craft research & documentation (2025)", "Sozani embroidery, Srinagar."),
+    ("Bagh print", "Designed and developed a stole using traditional Bagh block printing — motif development, colour selection, block placement and hand printing."),
+    ("Tirathram and Company (ongoing)", "Photography shoot for their upcoming collection."),
+]
+SKILLS = ["Print design", "Surface design", "Painting", "Weaving", "Design process", "Fabric manipulation",
+          "Motif development", "Concept development", "Photography", "Trend research (WGSN)"]
+TOOLS = ["Photoshop", "Illustrator", "InDesign", "Lightroom", "Procreate", "Canva", "VN", "Word", "PowerPoint"]
+EDUCATION = "Bachelor of Design, Textile Design (2023–2027) · NIFT Srinagar"
+
 CHAPTERS = [
     # id, title, subtitle, first page, last page
     ("intro",   "Introduction",      "Cover, about and contents",            1, 3),
@@ -167,6 +187,82 @@ f'''      <li class="ix-card ix-{a}" style="--span:{IX_SPAN[a]};--c:{IX_COL[a]}"
         <span class="ix-text"><span class="ix-num">{rng}</span><span class="ix-title">{esc(b)}</span><span class="ix-sub">{esc(s)}</span></span>
       </button></li>''')
 
+def contact_html():
+    exp = "".join(f"<li><b>{esc(t)}</b><span>{esc(d)}</span></li>" for t, d in EXPERIENCE)
+    return f'''  <section class="contact" id="contact" data-after="45" data-title="Contact" aria-labelledby="ctTitle">
+    <div class="ct-main">
+      <p class="sc-kick">Contact</p>
+      <h2 class="ct-title" id="ctTitle">Let’s talk textiles.</h2>
+      <p class="ct-lede">Questions about a project, or want to work together on print, weave or surface design? Write to Aastha directly.</p>
+      <div class="ct-actions">
+        <a class="ct-mail" href="mailto:{EMAIL}" data-copy="{EMAIL}" data-cur="btn" data-label="Copy"><span>{EMAIL}</span><em>Copy</em></a>
+        <a class="ct-pill" href="mailto:{NIFT}" data-cur="btn" data-label="Mail">{NIFT}</a>
+        <a class="ct-pill" href="{LINKEDIN}" target="_blank" rel="noopener me" data-cur="btn" data-label="Open">LinkedIn ↗</a>
+        <a class="ct-pill" href="{BEHANCE}" target="_blank" rel="noopener me" data-cur="btn" data-label="Open">Behance ↗</a>
+      </div>
+    </div>
+    <div class="ct-about">
+      <img src="img/portrait.webp" alt="Portrait of {esc(NAME)}" width="400" height="500" loading="lazy" decoding="async">
+      <div>
+        <h3>About {esc(NAME.split()[0])}</h3>
+        <p>{esc(BIO)}</p>
+        <p class="ct-edu">{esc(EDUCATION)}</p>
+        <h3>Experience</h3><ul class="ct-exp">{exp}</ul>
+        <h3>Skills</h3><p class="ct-tags">{" · ".join(esc(x) for x in SKILLS)}</p>
+        <h3>Software</h3><p class="ct-tags">{" · ".join(esc(x) for x in TOOLS)}</p>
+      </div>
+    </div>
+  </section>'''
+
+def seo_head():
+    desc = (f"{NAME} — textile designer at NIFT Srinagar. Portfolio of print, surface, weave and tie & dye projects: "
+            "Unbuilt, Fables of Mithila, Saandra, Seed Scriptures, Roundup, Kargha and Baandh.")
+    abs_ = (lambda u: f"{SITE_URL}/{u}") if SITE_URL else (lambda u: u)
+    out = [f'<meta name="description" content="{esc(desc)}">',
+           '<meta name="robots" content="index,follow,max-image-preview:large">',
+           f'<meta name="author" content="{esc(NAME)}">',
+           f'<meta property="og:site_name" content="{esc(NAME)} — Textile Design Portfolio">',
+           f'<meta property="og:title" content="{esc(NAME)} — Textile Designer Portfolio">',
+           f'<meta property="og:description" content="{esc(desc)}">',
+           '<meta property="og:type" content="profile">',
+           f'<meta property="profile:first_name" content="{esc(NAME.split()[0])}">',
+           f'<meta property="profile:last_name" content="{esc(NAME.split()[-1])}">',
+           f'<meta property="og:image" content="{abs_("og.jpg")}">',
+           '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">',
+           f'<meta property="og:image:alt" content="{esc(NAME)} — textile design portfolio cover">',
+           '<meta property="og:locale" content="en_IN">',
+           '<meta name="twitter:card" content="summary_large_image">',
+           f'<meta name="twitter:title" content="{esc(NAME)} — Textile Designer Portfolio">',
+           f'<meta name="twitter:description" content="{esc(desc)}">',
+           f'<meta name="twitter:image" content="{abs_("og.jpg")}">']
+    if SITE_URL:
+        out += [f'<link rel="canonical" href="{SITE_URL}/">', f'<meta property="og:url" content="{SITE_URL}/">']
+    return "\n".join(out)
+
+def jsonld():
+    from scenes_def import CASES
+    abs_ = (lambda u: f"{SITE_URL}/{u}") if SITE_URL else (lambda u: u)
+    person = {"@type": "Person", "@id": "#aastha", "name": NAME, "jobTitle": ROLE, "description": BIO,
+              "email": f"mailto:{EMAIL}", "image": abs_("img/portrait.webp"),
+              "affiliation": {"@type": "CollegeOrUniversity", "name": SCHOOL},
+              "alumniOf": {"@type": "CollegeOrUniversity", "name": SCHOOL},
+              "knowsAbout": SKILLS + ["Textile design", "Block printing", "Tie and dye", "Handloom weaving"],
+              "sameAs": [LINKEDIN, BEHANCE]}
+    works = []
+    for i, (cid, title, sub, start, end) in enumerate([c for c in CHAPTERS if c[0] not in ("intro", "thanks")]):
+        c = CASES.get(start)
+        works.append({"@type": "ListItem", "position": i + 1, "item": {
+            "@type": "CreativeWork", "name": title, "genre": sub, "creator": {"@id": "#aastha"},
+            "description": c[2] if c else sub, "image": abs_(f"img/{start:02d}.webp"),
+            "url": abs_(f"#p{start}")}})
+    page = {"@type": "ProfilePage", "name": f"{NAME} — Textile Design Portfolio", "mainEntity": {"@id": "#aastha"},
+            "inLanguage": "en", "hasPart": {"@type": "ItemList", "name": "Projects", "itemListElement": works}}
+    if SITE_URL:
+        page["url"] = SITE_URL + "/"
+    return json.dumps({"@context": "https://schema.org", "@graph": [person, page]}, ensure_ascii=False, indent=1).replace("</", "<\\/")
+
+sections.append(contact_html())       # contact + about, after the last page
+
 ribbon = "".join(f'<span><i style="background:{IX_COL[a]}"></i>{esc(b)}</span>' for a, b, s, x, y in CHAPTERS if a not in ("intro", "thanks"))
 
 tpl = pathlib.Path(__file__).with_name("template.html").read_text()
@@ -176,7 +272,22 @@ out = (tpl.replace("{{NAME}}", esc(NAME))
           .replace("{{TICKS}}", "\n    ".join(ticks))
           .replace("{{INDEX}}", "\n".join(index_items))
           .replace("{{RIBBON}}", ribbon + ribbon)
+          .replace("{{SEO}}", seo_head())
+          .replace("{{JSONLD}}", jsonld())
+          .replace("{{EMAIL}}", EMAIL).replace("{{NIFT}}", NIFT).replace("{{LINKEDIN}}", LINKEDIN).replace("{{BEHANCE}}", BEHANCE)
           .replace("{{DATA}}", json.dumps(data, ensure_ascii=False))
           .replace("{{SCENEDATA}}", scene_data()))
 pathlib.Path(__file__).resolve().parent.parent.joinpath("index.html").write_text(out)
 print("index.html written:", len(out), "bytes")
+
+root = pathlib.Path(__file__).resolve().parent.parent
+robots = "User-agent: *\nAllow: /\n" + (f"\nSitemap: {SITE_URL}/sitemap.xml\n" if SITE_URL else "")
+root.joinpath("robots.txt").write_text(robots)
+if SITE_URL:
+    import datetime
+    root.joinpath("sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+        'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n'
+        f'  <url><loc>{SITE_URL}/</loc><lastmod>{datetime.date.today()}</lastmod>'
+        + "".join(f"<image:image><image:loc>{SITE_URL}/img/{n:02d}.webp</image:loc></image:image>" for n in range(1, 46))
+        + '</url>\n</urlset>\n')

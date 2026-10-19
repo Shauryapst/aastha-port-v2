@@ -64,3 +64,6 @@ STRAIGHT DRAFT (p36), GEOMETRY (p39). Re-run it after replacing the slide images
 - **Clickable email/Behance/LinkedIn areas** on pages 2 and 45 are set in `HOTSPOTS` in `_edit/build.py`.
 - Index: drifting watercolour, a moving ribbon of project names, an editorial grid; each card flips through its project's pages (`img/thumb/`, 1100px) with a slow pan inside a running stitch in the project's colour.
 - Right rail: a thread with a stitch per page and a bead per project, dyed up to the current page, ending in a needle.
+- SEO: descriptive title/description, Open Graph + Twitter cards (og.jpg 1200×630), JSON-LD (Person + ProfilePage with the 7 projects), real-text contact & about section, h2 per case study, robots.txt. **Set `SITE_URL` in `_edit/build.py` once the Netlify address is known** and rebuild — that adds canonical/og:url, absolute image URLs and writes sitemap.xml.
+- Contact: a Contact button in the top bar opens a card (copy email, LinkedIn, Behance); full contact + about section after the last page.
+

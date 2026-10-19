@@ -167,7 +167,7 @@ CASES = {
 def case_html(n):
     no, proj, brief, process, outcome, tags = CASES[n]
     return (f'  <section class="case" data-after="{n}" data-title="Case study" aria-label="{esc(proj)} — case study">\n'
-            f'    <p class="case-kick">{no} · {esc(proj)} · Case study</p>\n'
+            f'    <h2 class="case-kick">{no} · {esc(proj)} · Case study</h2>\n'
             f'    <div class="case-grid">'
             f'<div><h3>Brief</h3><p>{esc(brief)}</p></div>'
             f'<div><h3>Process</h3><p>{esc(process)}</p></div>'
