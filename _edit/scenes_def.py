@@ -247,7 +247,7 @@ LIBS = {
 def lib_html(n):
     no, proj, title, sub, items, kind = LIBS[n]
     cards = "".join(
-        f'<figure class="lib-card"><button type="button" class="lib-open" data-full="img/lib/{f}" data-cap="{esc(proj)} — {esc(c)}" '
+        f'<figure class="lib-card"><button type="button" class="lib-open" data-full="img/lib/full/{f}" data-thumb="img/lib/{f}" data-cap="{esc(proj)} — {esc(c)}" '
         f'data-cur="btn" data-label="View" aria-label="View {esc(proj)} {esc(c)} large">'
         f'<img src="img/lib/{f}" loading="lazy" decoding="async" alt="{esc(proj)} — {esc(c)}" width="{LIB_META[f]["w"]}" height="{LIB_META[f]["h"]}">'
         f'</button><figcaption>{esc(c)}</figcaption></figure>' for f, c in items)

@@ -44,6 +44,7 @@ scene text and timings live in `_edit/scenes_def.py`; the animation code is `sce
 
 ## Print libraries, the shoot & backgrounds
 - The separate images from Canva ("PORTFOLIO SLIDES/IMAGES") are cut into single prints and photos in `img/lib/`
+- Large view uses `img/lib/full/` — re-cut from the full-resolution exports, gently lifted (+5% contrast, +7% colour, no auto-levels so grounds stay true), 2× Lanczos and sharpened. Zoom resizes the image for real instead of scaling it, so it stays crisp. Rebuild with `python3 _edit/lib_enhance.py <folder of source crops>`.
   (list in `_edit/lib.json`). They appear as **print libraries** after Unbuilt, Fables of Mithila, Saandra and Seed Scriptures,
   and as **The shoot** after the Roundup photos. Click any print or photo for a large view; click again to zoom.
   Sections and captions are set in `LIBS` in `_edit/scenes_def.py`.

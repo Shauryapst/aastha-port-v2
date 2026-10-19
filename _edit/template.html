@@ -347,8 +347,10 @@ html.portrait{scroll-snap-type:y proximity}
 .lbx-frame{position:relative;max-width:min(88vw,1100px);max-height:82vh;overflow:hidden;border-radius:6px;box-shadow:0 40px 90px rgba(0,0,0,.55);
   transform:scale(.94);transition:transform .6s var(--ease)}
 #lbx.on .lbx-frame{transform:none}
-.lbx-frame img{display:block;max-width:min(88vw,1100px);max-height:82vh;width:auto;height:auto;transition:transform .35s var(--ease);transform-origin:var(--ox,50%) var(--oy,50%)}
-.lbx-frame.zoom img{transform:scale(2.2)}
+.lbx-frame img{display:block;max-width:min(88vw,1100px);max-height:82vh;width:auto;height:auto;background:#fbf8f1 var(--thumb,none) center/100% 100% no-repeat}
+/* zoom changes the real size (not a transform), so the browser draws it from the full-resolution file */
+.lbx-frame.zoom{cursor:zoom-out}
+.lbx-frame.zoom img{position:absolute;max-width:none;max-height:none;width:var(--zw);height:var(--zh);left:var(--lx,0);top:var(--ly,0);transition:left .12s linear,top .12s linear}
 .lbx-cap{position:absolute;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);color:var(--cream);font:500 12px/1 var(--font-ui);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
 .lbx-close{position:absolute;top:calc(18px + env(safe-area-inset-top,0px));right:var(--pad);appearance:none;background:none;border:1.5px solid var(--cream);color:var(--cream);
   border-radius:999px;padding:10px 16px;font:500 12px/1 var(--font-ui);letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
@@ -846,14 +848,25 @@ if(fine){
 /* ---------- large view for the print libraries & shoot ---------- */
 (function(){
   var box=$("#lbx"), frame=$(".lbx-frame",box), img=$("img",frame), cap=$(".lbx-cap",box), opener=null;
-  function open(b){opener=b;img.src=b.dataset.full;img.alt=b.dataset.cap;cap.textContent=b.dataset.cap+(fine?"  ·  click to zoom":"");
+  var Z=2.2;
+  function place(x,y){var W=frame.clientWidth,H=frame.clientHeight,fx=Math.min(1,Math.max(0,x)),fy=Math.min(1,Math.max(0,y));
+    frame.style.setProperty("--lx",(-fx*W*(Z-1))+"px");frame.style.setProperty("--ly",(-fy*H*(Z-1))+"px")}
+  function unzoom(){frame.classList.remove("zoom");frame.style.width=frame.style.height=""}
+  function open(b){opener=b;unzoom();frame.style.setProperty("--thumb",'url("'+b.dataset.thumb+'")');img.src=b.dataset.full;img.alt=b.dataset.cap;cap.textContent=b.dataset.cap+(fine?"  ·  click to zoom":"");
     box.classList.add("on");box.setAttribute("aria-hidden","false");root.classList.add("ix-open");loupeOn=false;$(".lbx-close",box).focus({preventScroll:true})}
-  function close(){box.classList.remove("on");box.setAttribute("aria-hidden","true");frame.classList.remove("zoom");root.classList.remove("ix-open");if(opener)opener.focus({preventScroll:true})}
-  $$(".lib-open").forEach(function(b){b.addEventListener("click",function(e){e.stopPropagation();open(b)})});
+  function close(){box.classList.remove("on");box.setAttribute("aria-hidden","true");unzoom();root.classList.remove("ix-open");if(opener)opener.focus({preventScroll:true})}
+  $$(".lib-open").forEach(function(b){b.addEventListener("click",function(e){e.stopPropagation();open(b)});
+    // start fetching the large file as soon as someone shows interest
+    ["pointerenter","focus","touchstart"].forEach(function(ev){b.addEventListener(ev,function(){if(!b.__pre){b.__pre=new Image();b.__pre.src=b.dataset.full}},{passive:true,once:true})})});
   $(".lbx-close",box).addEventListener("click",close);
   box.addEventListener("click",function(e){if(e.target===box)close()});
-  frame.addEventListener("click",function(e){e.stopPropagation();frame.classList.toggle("zoom")});
-  frame.addEventListener("mousemove",function(e){var r=frame.getBoundingClientRect();frame.style.setProperty("--ox",((e.clientX-r.left)/r.width*100)+"%");frame.style.setProperty("--oy",((e.clientY-r.top)/r.height*100)+"%")});
+  frame.addEventListener("click",function(e){e.stopPropagation();
+    if(frame.classList.contains("zoom")){unzoom();return}
+    var r=frame.getBoundingClientRect();frame.style.width=r.width+"px";frame.style.height=r.height+"px";
+    frame.style.setProperty("--zw",(r.width*Z)+"px");frame.style.setProperty("--zh",(r.height*Z)+"px");
+    place((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);frame.classList.add("zoom")});
+  frame.addEventListener("mousemove",function(e){if(!frame.classList.contains("zoom"))return;var r=frame.getBoundingClientRect();place((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height)});
+  frame.addEventListener("touchmove",function(e){if(!frame.classList.contains("zoom"))return;e.preventDefault();var t=e.touches[0],r=frame.getBoundingClientRect();place((t.clientX-r.left)/r.width,(t.clientY-r.top)/r.height)},{passive:false});
   addEventListener("keydown",function(e){if(box.classList.contains("on")&&e.key==="Escape"){e.stopImmediatePropagation();close()}},true);
   window.__lbxOpen=function(){return box.classList.contains("on")};
 })();
