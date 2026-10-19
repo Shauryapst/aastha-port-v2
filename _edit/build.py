@@ -169,6 +169,8 @@ def cover_fx_html():
 
 # Each page in three widths; the browser takes the smallest that is sharp on the screen.
 # (img/xl/ at 4200 px is only for the magnifier and the phone reader's zoom.)
+# a ~250-byte blurred preview of every page, shown at once while the real image downloads
+LQIP = json.loads(pathlib.Path(__file__).with_name("lqip.json").read_text())
 def SRCSET(n):
     return f"img/w1200/{n:02d}.webp 1200w, img/w1800/{n:02d}.webp 1800w, img/{n:02d}.webp 2400w"
 SIZES = "(max-aspect-ratio: 1/1) calc(100vw - 24px), min(calc(100vw - 9vw), calc((100vh - 170px) * 2.83))"
@@ -205,7 +207,7 @@ for n in range(1, 46):
     if n == 1: hots += "\n      " + cover_fx_html()
     sections.append(
 f'''  <section class="{cls}" id="p{i}" data-i="{i}" data-x="{x}" aria-label="Page {i} of {NP}: {esc(c[1])}, {esc(title)}">
-    <div class="frame"><div class="art">
+    <div class="frame" style="--lq:url({LQIP[str(n)]})"><div class="art">
       <img src="img/{n:02d}.webp" srcset="{SRCSET(n)}" sizes="{SIZES}" data-n="{n}" width="2400" height="849" alt="{esc(c[1])} — {esc(title)}"{' fetchpriority="high"' if n == 1 else ''}{'' if eager else ' loading="lazy"'} decoding="async" draggable="false">{hots}
     </div></div>
   </section>''')

@@ -48,6 +48,18 @@ button{font:inherit;color:inherit}
 .frame{position:relative;width:100%;aspect-ratio:7015/2480;overflow:hidden;border-radius:6px;background:#e4dccb;
   box-shadow:0 1px 0 rgba(31,43,42,.06),0 34px 60px -42px rgba(31,43,42,.55);transform-origin:50% 50%;will-change:transform}
 .art{position:absolute;inset:0;transform-origin:50% 50%;will-change:transform}
+/* slow connections: the blurred preview shows at once, light runs across it like a sheen on cloth,
+   and the real page fades in over it when it arrives (never left hidden — see the failsafe in JS) */
+.frame{background-image:var(--lq,none);background-size:100% 100%;background-repeat:no-repeat}
+.frame.ld::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:linear-gradient(100deg,transparent 0 35%,rgba(255,248,235,.42) 50%,transparent 65%) 0 0/250% 100% no-repeat;
+  animation:ldSheen 1.6s ease-in-out infinite}
+@keyframes ldSheen{from{background-position:130% 0}to{background-position:-30% 0}}
+.art>img{transition:opacity .7s var(--ease)}
+.art>img.pending{opacity:0}
+.pg-cover .art>img.pending~.cover-fx,.pg-cover .art>img.pending~.cv-needles{opacity:0}
+.cover-fx,.cv-needles{transition:opacity .7s var(--ease)}
+html.reduced .frame.ld::before{animation:none;background:none}
 .art img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:fill;max-width:none;
   user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none;color:transparent}
 .hot{position:absolute;z-index:2;display:block;border-radius:6px}
@@ -748,6 +760,26 @@ function measure(){var y=pageYOffset;tops=secs.map(function(s){return s.getBound
 function maxY(){return document.documentElement.scrollHeight-innerHeight}
 layout();
 
+/* ---------- slow connections: blurred preview + sheen until each page image arrives ---------- */
+(function(){
+  var pend=[];
+  secs.forEach(function(s){
+    var im=$(".art>img",s), fr=$(".frame",s); if(!im||!fr)return;
+    if(im.complete&&im.naturalWidth)return;
+    fr.classList.add("ld"); im.classList.add("pending"); pend.push(im);
+    function done(){im.classList.remove("pending");fr.classList.remove("ld")}
+    im.addEventListener("load",done,{once:true}); im.addEventListener("error",done,{once:true});
+    im.__done=done; im.__t=performance.now();
+  });
+  // failsafe: anything already decoded is shown; nothing stays hidden for more than 12 s once it starts loading
+  var sweep=setInterval(function(){
+    var left=0;
+    pend.forEach(function(im){if(!im.classList.contains("pending"))return;
+      if((im.complete&&im.naturalWidth)||performance.now()-im.__t>12000&&im.getBoundingClientRect().top<innerHeight*2)im.__done();else left++});
+    if(!left)clearInterval(sweep);
+  },400);
+})();
+
 /* ---------- loader: letters write in, then the screen splits open ---------- */
 var lname=$("#lname");
 lname.innerHTML=lname.textContent.split("").map(function(ch,k){
@@ -764,7 +796,7 @@ var minShow=reduced?0:(ss("seen")?350:1300);   /* returning in the same session:
   shown+=(target-shown)*0.1+0.3; if(shown>target)shown=target;
   lcount.textContent=pad(Math.min(99,Math.round(shown))); lline.style.width=shown+"%";
   var t=performance.now()-t0;
-  if((shown>=99.5&&t>minShow)||t>6000){lcount.textContent="100";lline.style.width="100%";setTimeout(start,reduced?0:250);return}
+  if((shown>=99.5&&t>minShow)||t>2600){lcount.textContent="100";lline.style.width="100%";setTimeout(start,reduced?0:250);return}
   requestAnimationFrame(count);
 })();
 function start(){
@@ -1055,10 +1087,11 @@ if(fine&&!reduced)$$(".ix-thumb",ix).forEach(function(t){
   function show(k,keepZoom){
     at=clamp(k,0,pages.length-1); var s=pages[at], n=srcN(s), i=+s.dataset.i, ch=chapterOf(i);
     sc.classList.remove("z");
-    im.onload=null; im.src=std(n);
-    var x=+s.dataset.x||0;
-    im.onload=function(){sc.scrollLeft=(sc.scrollWidth-sc.clientWidth)*x;sc.scrollTop=0;
-      var big=new Image(); big.onload=function(){if(pages[at]===s)im.src=big.src}; big.src=xl(n)};   /* sharpen with the large file */
+    var x=+s.dataset.x||0, first=true, onPage=$(".art>img",s);
+    im.onload=function(){if(!first)return; first=false; sc.scrollLeft=(sc.scrollWidth-sc.clientWidth)*x; sc.scrollTop=0;
+      var sharp=new Image(); sharp.onload=function(){if(pages[at]===s&&!sc.classList.contains("z"))im.src=sharp.src}; sharp.src=std(n)};
+    im.src=(onPage&&onPage.currentSrc&&onPage.complete&&onPage.naturalWidth)?onPage.currentSrc:std(n);   /* what is already on screen opens instantly */
+    im.dataset.n=n;
     $("#pvT").innerHTML=esc(ch.title)+(P[i-1]&&P[i-1]!==ch.title?"<small>"+esc(P[i-1])+"</small>":"");
     $("#pvN").textContent=pad(i)+" / "+pad(N);
     $("#pvPrev").disabled=at===0; $("#pvNext").disabled=at===pages.length-1;
@@ -1090,6 +1123,7 @@ if(fine&&!reduced)$$(".ix-thumb",ix).forEach(function(t){
     var now=Date.now(); if(now-lastTap>320){lastTap=now;return} lastTap=0;
     var r=im.getBoundingClientRect(), fx_=(e.clientX-r.left)/r.width, fy_=(e.clientY-r.top)/r.height, z=!sc.classList.contains("z");
     sc.classList.toggle("z",z);
+    if(z){var n=+im.dataset.n, big=new Image(); big.onload=function(){if(+im.dataset.n===n)im.src=big.src}; big.src=xl(n)}   /* full detail only when zoomed */
     var r2=im.getBoundingClientRect();
     sc.scrollLeft+= (r2.left+fx_*r2.width)-e.clientX; sc.scrollTop+= (r2.top+fy_*r2.height)-e.clientY;
     $("#pvHint").textContent=z?"Drag to look around · double-tap to zoom out":"Swipe across to read · double-tap to zoom";
