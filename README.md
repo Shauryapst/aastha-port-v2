@@ -50,6 +50,11 @@ scene text and timings live in `_edit/scenes_def.py`; the animation code is `sce
 - The dark scene and studio backgrounds use her cover watercolour (lettering removed): `img/bg/watercolour-dark.webp`;
   the print libraries sit on a faint wash of `img/bg/watercolour.webp`.
 
+## Spelling fixes in the slides
+A few typos are baked into the Canva images. `_edit/typos/fix_typos.py` fixes them by moving letters that already
+exist on the same slide (same font and colour): Exploration (p14), geometry and Brainstorming (p26),
+STRAIGHT DRAFT (p36), GEOMETRY (p39). Re-run it after replacing the slide images with a fresh Canva export.
+
 ## Updating
 - **Changed a page in Canva?** Download it as PNG and replace `img/NN.webp` and `img/xl/NN.webp`
   (2400 px and 4200 px wide, WebP). Or ask Claude to redo the conversion.

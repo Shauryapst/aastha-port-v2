@@ -239,7 +239,7 @@ LIBS = {
          [(f, f"Print {k + 1:02d}") for k, f in enumerate(_files("saandra-"))], "prints"),
     32: ("04", "Seed Scriptures", "Print library", "Five pomegranate prints · repeat 8 × 8 in.",
          [(f, f"Print {k + 1:02d}") for k, f in enumerate(_files("seed-"))], "prints"),
-    36: ("05", "Roundup", "The shoot", "Both handwoven mufflers, worn — muffler 1 in blue twill and honeycomb, muffler 2 in the yellow-and-blue check.",
+    37: ("05", "Roundup", "The shoot", "Both handwoven mufflers, worn — muffler 1 in blue twill and honeycomb, muffler 2 in the yellow-and-blue check.",
          [(f, ("Muffler 1" if "blue" in f else "Muffler 2")) for f in _files("shoot-blue-") + _files("shoot-yellow-")], "shoot"),
 }
 
