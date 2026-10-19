@@ -587,6 +587,35 @@ html.ix-open #toast{opacity:0!important}
 @media (max-width:760px){.case-grid{grid-template-columns:1fr;gap:16px}}
 .portrait .case{padding:28px 18px 34px}
 
+/* ---------- the cover: lettering writes itself, needles keep sewing, light moves over the cloth ---------- */
+.pg-cover{--tx:0deg;--ty:0deg;--nx:0px;--ny:0px;--lx:50%;--ly:40%}
+.pg-cover .art>img,.cover-fx,.cv-needles{transform:perspective(1400px) rotateX(var(--ty)) rotateY(var(--tx));transform-origin:50% 50%}
+.cover-fx,.cv-needles{position:absolute;inset:0;pointer-events:none}
+.cover-fx{overflow:hidden}
+.cover-fx img.cv-patch{position:absolute;right:auto;bottom:auto;object-fit:fill;display:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent 33.3%,#000 40%);mask-image:linear-gradient(90deg,transparent 33.3%,#000 40%);
+  -webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:60% 0;mask-position:60% 0}
+html.js:not(.reduced) .cover-fx img.cv-patch{display:block}
+html.js:not(.loading):not(.reduced) .cover-fx img.cv-patch{animation:cvWrite var(--t) linear var(--d) both}
+@keyframes cvWrite{from{-webkit-mask-position:60% 0;mask-position:60% 0}to{-webkit-mask-position:0% 0;mask-position:0% 0;visibility:hidden}}
+.cv-sheen{position:absolute;inset:0;mix-blend-mode:soft-light;
+  background:linear-gradient(110deg,transparent 38%,rgba(255,238,205,.55) 48%,rgba(255,255,255,.12) 53%,transparent 62%) 0 0/260% 100% no-repeat;
+  animation:cvSheen 11s ease-in-out 3.5s infinite;background-position:130% 0}
+@keyframes cvSheen{0%{background-position:130% 0}45%,100%{background-position:-30% 0}}
+.cv-light{position:absolute;inset:0;mix-blend-mode:soft-light;opacity:0;transition:opacity .6s;
+  background:radial-gradient(38% 70% at var(--lx) var(--ly),rgba(255,240,215,.55),transparent 70%)}
+.pg-cover:hover .cv-light{opacity:1}
+.cv-sew{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.cv-path{fill:none}   /* no stroke of its own, so each <use> copy can take the thread colour */
+.cv-trail{fill:none;stroke-width:8;stroke-linecap:round;opacity:0;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+.cv-trail.gold{stroke:#e2a64b}.cv-trail.cream{stroke:#f3dcb5}
+.cv-needles{width:100%;height:100%;overflow:visible;filter:drop-shadow(4px 7px 4px rgba(0,0,0,.4))}
+.cv-needles{translate:var(--nx) var(--ny)}
+.cv-needle{opacity:0}
+.cv-needle path{fill:#dcd8cf;stroke:#55605c;stroke-width:2.2}
+.cv-needle ellipse{fill:#1f2b2a}
+html.reduced .cv-sheen,html.reduced .cv-needles,html.reduced .cv-trail{display:none}
+
 /* ---------- contact + about (real text, for people and search engines) ---------- */
 .contact{display:grid;grid-template-columns:1.1fr 1fr;gap:clamp(28px,5vw,80px);align-items:start;
   margin-top:calc(var(--gap) * .6);padding:clamp(40px,6vw,90px) clamp(4px,1vw,12px) 0;border-top:1px solid rgba(31,43,42,.16);color:var(--ink)}
@@ -827,9 +856,10 @@ html.reduced .sc-pin{position:relative;height:100vh}
 
 <main id="stack">
   <h1 class="sr">Aastha Rajput — Textile design portfolio 2026</h1>
-  <section class="pg ch-start" id="p1" data-i="1" data-x="0.6" aria-label="Page 1 of 44: Introduction, Cover">
+  <section class="pg ch-start pg-cover" id="p1" data-i="1" data-x="0.5" aria-label="Page 1 of 44: Introduction, Cover">
     <div class="frame"><div class="art">
       <img src="img/01.webp" srcset="img/01.webp 2400w, img/xl/01.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="1" width="2400" height="849" alt="Introduction — Cover" fetchpriority="high" decoding="async" draggable="false">
+      <div class="cover-fx" aria-hidden="true"><img class="cv-patch" src="img/cover/t1.webp" alt="" decoding="async" style="left:31.786%;top:28.283%;width:18.81%;height:6.599%;--d:0.35s;--t:0.90s"><img class="cv-patch" src="img/cover/t2.webp" alt="" decoding="async" style="left:36.31%;top:34.882%;width:39.762%;height:32.458%;--d:1.00s;--t:2.10s"><img class="cv-patch" src="img/cover/t3.webp" alt="" decoding="async" style="left:61.19%;top:66.33%;width:15.833%;height:5.589%;--d:2.95s;--t:0.95s"><img class="cv-patch" src="img/cover/t2f.webp" alt="" decoding="async" style="left:54.286%;top:28.62%;width:5.714%;height:6.263%;--d:1.95s;--t:0.30s"><i class="cv-sheen"></i><i class="cv-light"></i><svg class="cv-sew" viewBox="0 0 4200 1485" preserveAspectRatio="none"><path id="cvs0" class="cv-path" d="M1845 1212 L1875 1214 L1905 1215 L1931 1216 L1950 1220 L1968 1227 L1988 1235 L2009 1244 L2030 1252 L2048 1260 L2067 1267 L2085 1276 L2100 1283 L2115 1290 L2132 1297 L2151 1305 L2170 1313 L2188 1320 L2207 1328 L2227 1335 L2250 1343 L2272 1351 L2292 1359 L2311 1366 L2330 1375 L2348 1384 L2367 1393 L2386 1404 L2405 1416 L2423 1428 L2435 1436 L2442 1441 L2450 1443"/><use href="#cvs0" class="cv-trail cv-trail0 gold"/><path id="cvs1" class="cv-path" d="M1950 1267 L1965 1270 L1980 1273 L1994 1275 L2007 1280 L2020 1288 L2036 1296 L2053 1303 L2070 1311 L2085 1319 L2100 1326 L2115 1333 L2132 1340 L2149 1348 L2167 1356 L2186 1363 L2205 1370 L2225 1376 L2246 1382 L2265 1390 L2282 1396 L2299 1404 L2316 1411 L2333 1420 L2350 1428 L2365 1436 L2380 1444 L2392 1452 L2400 1458 L2407 1463"/><use href="#cvs1" class="cv-trail cv-trail1 gold"/><path id="cvs2" class="cv-path" d="M3235 281 L3259 275 L3283 267 L3306 264 L3325 260 L3343 259 L3370 255 L3400 253 L3430 250 L3456 249 L3482 249 L3508 248 L3535 242 L3561 236 L3582 230 L3601 226 L3620 221 L3638 216 L3657 209 L3675 202 L3690 194 L3705 188 L3720 183 L3735 177 L3750 171 L3768 164 L3787 157 L3806 149 L3825 142 L3843 131 L3865 118 L3887 103 L3910 93 L3932 84 L3955 77 L3976 66 L3995 55 L4013 44 L4032 33 L4051 24 L4070 18"/><use href="#cvs2" class="cv-trail cv-trail2 cream"/><path id="cvs3" class="cv-path" d="M3320 286 L3350 286 L3380 282 L3410 282 L3440 278 L3470 278 L3497 276 L3523 277 L3550 276 L3572 274 L3595 266 L3616 256 L3635 247 L3653 242 L3672 239 L3691 235 L3710 229 L3725 221 L3740 214 L3756 207 L3775 200 L3793 192 L3812 185 L3831 177 L3850 169 L3868 161 L3887 153 L3906 143 L3925 133 L3943 122 L3965 111 L3987 100 L4010 90 L4028 80 L4047 71 L4065 63 L4080 55 L4095 49"/><use href="#cvs3" class="cv-trail cv-trail3 cream"/></svg></div><svg class="cv-needles" aria-hidden="true" viewBox="0 0 4200 1485" preserveAspectRatio="none"><g class="cv-needle"><g transform="scale(1.7)"><path d="M-128 0 Q-124 -7 -104 -8 L60 -3.2 Q78 0 60 3.2 L-104 8 Q-124 7 -128 0Z"/><ellipse cx="-110" cy="0" rx="10" ry="3"/></g></g><g class="cv-needle"><g transform="scale(1.7)"><path d="M-128 0 Q-124 -7 -104 -8 L60 -3.2 Q78 0 60 3.2 L-104 8 Q-124 7 -128 0Z"/><ellipse cx="-110" cy="0" rx="10" ry="3"/></g></g></svg>
     </div></div>
   </section>
   <section class="pg" id="p2" data-i="2" data-x="0" aria-label="Page 2 of 44: Introduction, About Aastha">
@@ -1593,6 +1623,49 @@ if(fine&&!reduced)$$(".ix-thumb",ix).forEach(function(t){
   t.addEventListener("mouseleave",function(){t.classList.remove("tilting");t.style.transform=""});
 });
 
+/* ---------- cover: needles sew along her stitch lines; the collage tilts with the pointer ---------- */
+(function(){
+  var cov=$(".pg-cover"); if(!cov||reduced)return;
+  var paths=$$(".cv-path",cov), trails=$$(".cv-trail",cov), needles=$$(".cv-needle",cov);
+  if(!paths.length||!needles.length)return;
+  var vis=true, L=paths.map(function(p){return p.getTotalLength()});
+  if("IntersectionObserver" in window)new IntersectionObserver(function(es){vis=es[0].isIntersecting}).observe(cov);
+  // two needles: one sews the gold pair at the bottom, one the cream pair at the top
+  var sew=[{lines:[0,1],k:0,s:-40,wait:0,speed:300},{lines:[2,3],k:0,s:-300,wait:0,speed:330}];
+  var SEG=420, last=performance.now();
+  function frame(now){
+    var dt=Math.min(.05,(now-last)/1000); last=now;
+    if(vis&&!root.classList.contains("loading"))sew.forEach(function(n,i){
+      var j=n.lines[n.k], p=paths[j], len=L[j], tr=trails[j], nd=needles[i];
+      if(n.wait>0){n.wait-=dt;if(n.wait<=0){tr.style.opacity=0;n.k=(n.k+1)%n.lines.length;n.s=0}return}
+      n.s+=n.speed*dt;
+      if(n.s>len+SEG){n.wait=1.6;nd.style.opacity=0;return}
+      var s=Math.max(0,Math.min(len,n.s)), a=p.getPointAtLength(s), b=p.getPointAtLength(Math.min(len,s+4)),
+          ang=Math.atan2(b.y-a.y,b.x-a.x)*57.2958, bob=Math.sin(n.s/26)*9;            /* dips in and out of the cloth */
+      nd.setAttribute("transform","translate("+a.x.toFixed(1)+" "+a.y.toFixed(1)+") rotate("+ang.toFixed(1)+") translate(0 "+(bob).toFixed(1)+") rotate("+(bob*.9).toFixed(1)+")");
+      nd.style.opacity=n.s<len?1:Math.max(0,1-(n.s-len)/SEG);
+      tr.style.opacity=.95;
+      tr.style.strokeDasharray=SEG+" "+(len+SEG*2);
+      tr.style.strokeDashoffset=(-(n.s-SEG)).toFixed(1);                               /* fresh thread trailing behind the eye */
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  // depth: the collage leans toward the pointer, the needles float above it
+  var tx=0,ty=0,gx=0,gy=0,moving=0;
+  function aim(fx,fy){gx=fx;gy=fy;if(!moving){moving=1;requestAnimationFrame(ease)}}
+  function ease(){tx+=(gx-tx)*.08;ty+=(gy-ty)*.08;
+    cov.style.setProperty("--tx",(tx*3.2).toFixed(3)+"deg");cov.style.setProperty("--ty",(-ty*2.4).toFixed(3)+"deg");
+    cov.style.setProperty("--nx",(tx*-9).toFixed(2)+"px");cov.style.setProperty("--ny",(ty*-7).toFixed(2)+"px");
+    if(Math.abs(gx-tx)+Math.abs(gy-ty)>.002)requestAnimationFrame(ease);else moving=0}
+  if(fine){
+    addEventListener("mousemove",function(e){if(!vis)return;aim(e.clientX/innerWidth-.5,e.clientY/innerHeight-.5);
+      var r=cov.getBoundingClientRect();cov.style.setProperty("--lx",((e.clientX-r.left)/r.width*100).toFixed(1)+"%");cov.style.setProperty("--ly",((e.clientY-r.top)/r.height*100).toFixed(1)+"%")},{passive:true});
+  } else if("DeviceOrientationEvent" in window && typeof DeviceOrientationEvent.requestPermission!=="function"){
+    addEventListener("deviceorientation",function(e){if(!vis||e.gamma==null)return;aim(clamp(e.gamma/30,-.5,.5),clamp((e.beta-45)/40,-.5,.5))},{passive:true});
+  }
+})();
+
 /* ---------- contact card ---------- */
 var ct=$("#ct"), ctBtn=$("#ctBtn"), ctOpen=false;
 function openContact(){if(ctOpen)return;if(idxOpen)closeIndex();ctOpen=true;loupeOn=false;ct.classList.add("on");ct.setAttribute("aria-hidden","false");
@@ -1642,7 +1715,7 @@ var loupe=$("#loupe"), loupeOn=false, inPage=null, mx=-500, my=-500, pmx=-500, p
 function xl(n){return "img/xl/"+pad(n)+".webp"}
 function std(n){return "img/"+pad(n)+".webp"}
 function setLoupeImage(pg){
-  var n=+pg.dataset.i; if(+loupe.dataset.n===n)return; loupe.dataset.n=n;
+  var pim=$("img[data-n]",pg), n=pim?+pim.dataset.n:+pg.dataset.i;   /* the Canva page number, not the site position */ if(+loupe.dataset.n===n)return; loupe.dataset.n=n;
   loupe.style.backgroundImage='url("'+xl(n)+'"),url("'+std(n)+'")';
   if(!xlWarm[n]){xlWarm[n]=1;var im=new Image();im.src=xl(n)}
 }

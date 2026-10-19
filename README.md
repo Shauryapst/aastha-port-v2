@@ -67,4 +67,5 @@ STRAIGHT DRAFT (p36), GEOMETRY (p39). Re-run it after replacing the slide images
 - SEO: descriptive title/description, Open Graph + Twitter cards (og.jpg 1200×630), JSON-LD (Person + ProfilePage with the 7 projects), real-text contact & about section, h2 per case study, robots.txt. **Set `SITE_URL` in `_edit/build.py` once the Netlify address is known** and rebuild — that adds canonical/og:url, absolute image URLs and writes sitemap.xml.
 - Contact: a Contact button in the top bar opens a card (copy email, LinkedIn, Behance); full contact + about section after the last page.
 - Pages left out: `SKIP` in `_edit/build.py` (37, the shoot collage, duplicates the Shoot grid). The site renumbers itself (44 pages); image files keep their Canva numbers.
+- Cover (page 1): her torn-fabric collage (`_edit/cover/cover-src.webp`; old cover kept in `_edit/cover/`). The lettering writes itself in (lettering-free patches `img/cover/t*.webp` wiped away), two needles keep sewing along her gold and cream stitch lines (`_edit/cover/stitches.json`), a soft light sweeps the cloth, and the collage tilts toward the pointer / phone tilt.
 

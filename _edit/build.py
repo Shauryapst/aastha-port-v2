@@ -143,6 +143,30 @@ def toc_html():
             f'      <p class="toc-note">Seven projects · tap a stamp to open it</p>\n'
             f'      <ol class="toc-list">{"".join(items)}</ol>\n'
             f'    </div></div>\n  </section>')
+# ---------- the cover comes alive ----------
+COVER_W, COVER_H = 4200, 1485
+# lettering "writes itself": each block is hidden by a lettering-free patch that is wiped away
+# by a pen moving left to right. (block, start s, duration s, x from, x to) in cover pixels
+COVER_PENS = {"t1": (0.35, 0.9, 1335, 2125), "t2": (1.0, 2.1, 1525, 3195), "t3": (2.95, 0.95, 2570, 3235)}
+def cover_fx_html():
+    meta = json.loads(pathlib.Path(__file__).with_name("cover").joinpath("patches.json").read_text())
+    pats = ""
+    for k, (l, t, w, h) in meta.items():
+        pen = COVER_PENS["t2" if k == "t2f" else k]
+        T, D, xa, xb = pen
+        px0 = l / 100 * COVER_W; px1 = px0 + w / 100 * COVER_W
+        d = T + (px0 - xa) / (xb - xa) * D; dur = max(0.15, (px1 - px0) / (xb - xa) * D)
+        pats += (f'<img class="cv-patch" src="img/cover/{k}.webp" alt="" decoding="async" '
+                 f'style="left:{l}%;top:{t}%;width:{w}%;height:{h}%;--d:{d:.2f}s;--t:{dur:.2f}s">')
+    lines = json.loads(pathlib.Path(__file__).with_name("cover").joinpath("stitches.json").read_text())
+    paths = "".join(f'<path id="cvs{j}" class="cv-path" d="M{" L".join(f"{x:.0f} {y:.0f}" for x, y in li)}"/>'
+                    f'<use href="#cvs{j}" class="cv-trail cv-trail{j} {"gold" if j < 2 else "cream"}"/>' for j, li in enumerate(lines))
+    needle = ('<g class="cv-needle"><g transform="scale(1.7)"><path d="M-128 0 Q-124 -7 -104 -8 L60 -3.2 Q78 0 60 3.2 L-104 8 Q-124 7 -128 0Z"/>'
+              '<ellipse cx="-110" cy="0" rx="10" ry="3"/></g></g>')
+    return (f'<div class="cover-fx" aria-hidden="true">{pats}<i class="cv-sheen"></i><i class="cv-light"></i>'
+            f'<svg class="cv-sew" viewBox="0 0 {COVER_W} {COVER_H}" preserveAspectRatio="none">{paths}</svg></div>'
+            f'<svg class="cv-needles" aria-hidden="true" viewBox="0 0 {COVER_W} {COVER_H}" preserveAspectRatio="none">{needle}{needle}</svg>')
+
 def _after(html_list, n, i):
     """Extras are defined against Canva page numbers; point them at the site page they follow."""
     return [h.replace(f'data-after="{n}"', f'data-after="{i}"') for h in html_list]
@@ -167,10 +191,12 @@ for n in range(1, 46):
     eager = n <= 3
     last = n == SRC[-1]
     # where a phone held upright starts each page (0 = left edge, 1 = right edge)
-    x = 0.6 if n == 1 else 0.82 if last else 1 if n == c[3] else 0
+    x = 0.5 if n == 1 else 0.82 if last else 1 if n == c[3] else 0
     if n == 3:                                   # contents page: live, animated stamps
         sections.append(toc_html()); sections.extend(_after(extras_after(n), n, i)); continue
     cls = "pg" + (" ch-start" if n == c[3] else "") + (" pg-last" if last else "")
+    if n == 1: cls += " pg-cover"
+    if n == 1: hots += "\n      " + cover_fx_html()
     sections.append(
 f'''  <section class="{cls}" id="p{i}" data-i="{i}" data-x="{x}" aria-label="Page {i} of {NP}: {esc(c[1])}, {esc(title)}">
     <div class="frame"><div class="art">
