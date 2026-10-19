@@ -131,6 +131,12 @@ meta["unbuiltPalette"] = [{"code": c + " TCX", "hex": swatch(6, (x - 40, y - 40,
 crop(37, (2135, 25, 4130, 1460), "roundup-photo.webp", maxw=1800)
 crop(38, (2050, 0, 4200, 990), "kargha-photo.webp", maxw=1800)
 
+
+# --- Baandh: tie & dye (pages 42, 44) ---
+crop(42, (1572, 315, 1972, 745), "baandh-sample.webp", maxw=800)           # the fan-folded pink sample
+crop(42, (1530, 990, 2100, 1270), "baandh-note.webp", maxw=600, q=88)       # her note: "Fanfold it"
+crop(44, (1500, 0, 4200, 1485), "baandh-cushions.webp", maxw=1800)
+
 (OUT / "scenes.json").write_text(json.dumps(meta, separators=(",", ":")))
 print("lines:", len(meta["fablesLines"]), "points:", sum(len(l) for l in meta["fablesLines"]))
 print("palette:", meta["unbuiltPalette"])

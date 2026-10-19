@@ -280,6 +280,42 @@ html.portrait{scroll-snap-type:y proximity}
   .mb-note h3{display:none}
   .mb-note-text{font-size:12px;line-height:1.5}
 }
+
+/* ---------- case studies (plain text, always visible) ---------- */
+.case{padding:clamp(18px,2.4vw,34px) clamp(4px,1vw,12px) clamp(6px,1vw,12px);border-top:1px solid rgba(31,43,42,.16);color:var(--ink)}
+.case-kick{margin:0 0 18px;font:500 11px/1 var(--font-ui);letter-spacing:.22em;text-transform:uppercase;color:var(--teal)}
+.case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,3vw,48px)}
+.case h3{margin:0 0 8px;font:400 clamp(22px,2vw,28px)/1 var(--font-display)}
+.case p{margin:0;font:400 clamp(14px,1.05vw,16px)/1.6 var(--font-ui);color:#3b4644}
+.case .case-tags{margin-top:18px;font:500 12px/1.5 var(--font-ui);letter-spacing:.04em;color:var(--muted)}
+@media (max-width:760px){.case-grid{grid-template-columns:1fr;gap:16px}}
+.portrait .case{padding:28px 18px 34px}
+
+/* ---------- colourway studio ---------- */
+.studio{--ground:#f8b931;position:relative;width:100vw;margin:calc(var(--gap) * .4) 0 calc(var(--gap) * .4) calc(50% - 50vw);
+  min-height:100vh;min-height:100svh;display:grid;grid-template-columns:minmax(250px,.9fr) 2.6fr;gap:clamp(20px,3.4vw,64px);align-items:center;
+  padding:clamp(72px,10vh,104px) var(--gx);background:var(--teal-deep);color:var(--cream)}
+.st-ways{display:grid;gap:8px;margin:0 0 22px}
+.st-way{appearance:none;display:flex;align-items:center;gap:14px;background:rgba(242,235,220,.05);border:1px solid rgba(242,235,220,.18);
+  border-radius:999px;padding:9px 16px 9px 10px;cursor:pointer;text-align:left;transition:background .3s,border-color .3s,transform .4s var(--ease)}
+.st-way:hover{background:rgba(242,235,220,.12);transform:translateX(4px)}
+.st-way[aria-pressed="true"]{background:var(--cream);color:var(--teal-deep);border-color:var(--cream)}
+.st-dots{display:flex}
+.st-dots i{width:20px;height:20px;border-radius:50%;margin-right:-6px;box-shadow:0 0 0 2px var(--teal-deep)}
+.st-way[aria-pressed="true"] .st-dots i{box-shadow:0 0 0 2px var(--cream)}
+.st-wname{margin-left:8px;font:400 19px/1.1 var(--font-display)}
+.st-stage{position:relative;height:min(78vh,760px);border-radius:10px;overflow:hidden;background:var(--ground);transition:background .6s;box-shadow:0 40px 80px -50px rgba(0,0,0,.8)}
+.st-stage canvas{position:absolute;inset:0;display:block}
+.st-name{position:absolute;left:16px;bottom:16px;z-index:2;background:rgba(251,248,241,.94);color:var(--teal-deep);border-radius:999px;padding:8px 14px;
+  font:500 12px/1 var(--font-ui);letter-spacing:.08em}
+.st-name:empty{display:none}
+@media (max-width:860px),(max-aspect-ratio:1/1){
+  .studio{grid-template-columns:1fr;align-items:start;gap:16px;padding:72px 16px 80px}
+  .studio .sc-sub,.studio .sc-spec{display:block}
+  .st-ways{grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
+  .st-wname{font-size:15px}
+  .st-stage{height:58vh}
+}
 html.reduced .scene{height:auto}
 html.reduced .sc-pin{position:relative;height:100vh}
 @media (max-width:760px){.tr{gap:16px}.ptt{display:none}.brand{font-size:21px}}
@@ -356,6 +392,7 @@ html.reduced .sc-pin{position:relative;height:100vh}
 <script id="data" type="application/json">{{DATA}}</script>
 <script id="scene-data" type="application/json">{{SCENEDATA}}</script>
 <script src="scenes.js"></script>
+<script src="studio.js"></script>
 <script>
 (function(){
 "use strict";
@@ -374,6 +411,7 @@ root.classList.add(fine?"fine":"coarse");
 if(reduced)root.classList.add("reduced");
 var SC=window.Scenes||null;
 if(SC)SC.init(JSON.parse(document.getElementById("scene-data").textContent));
+var ST=window.Studios||null; if(ST)ST.init();
 
 var secs=$$(".pg"), frames=secs.map(function(s){return $(".frame",s)}), arts=secs.map(function(s){return $(".art",s)});
 var isTitle=secs.map(function(s){return s.classList.contains("ch-start")});
@@ -478,21 +516,23 @@ function setCur(i){
   var ch=chapterOf(i);
   roll($("#chName"),ch.title);
   ticks.forEach(function(t,k){t.classList.toggle("on",k===i-1)});
-  if(ready&&lastCh&&ch!==lastCh){clearTimeout(flashT);flashT=setTimeout(function(){if(chapterOf(cur)===ch&&!idxOpen)flash(ch)},140)}
   lastCh=ch;
   if(i===N){$("#p45").classList.add("finale");totop.classList.add("show")}
   clearTimeout(hashT); hashT=setTimeout(function(){try{history.replaceState(null,"",i===1?location.pathname:"#p"+i)}catch(e){}},250);
 }
-var ticking=false, curLbl=null;
+var ticking=false, curLbl=null, extras=$$("[data-after]");
 function onScroll(force){
   if(ticking&&!force)return; ticking=true;
   requestAnimationFrame(function(){
     ticking=false;
     var y=pageYOffset, mid=y+innerHeight/2, best=1, bd=1e9;
     for(var k=0;k<tops.length;k++){var d=Math.abs(tops[k]+hs[k]/2-mid);if(d<bd){bd=d;best=k+1}}
+    var extra=null;
+    for(var q=0;q<extras.length;q++){var r=extras[q].getBoundingClientRect();if(r.top<=innerHeight/2&&r.bottom>=innerHeight/2){extra=extras[q];break}}
+    if(extra)best=+extra.dataset.after;
     if(y>=maxY()-2)best=N;
     setCur(best);
-    var sc=SC?SC.active(y,innerHeight):null, lbl=sc?sc.title:(P[cur-1]===chapterOf(cur).title?"":P[cur-1]);
+    var lbl=extra?extra.dataset.title:(P[cur-1]===chapterOf(cur).title?"":P[cur-1]);
     if(lbl!==curLbl){curLbl=lbl;roll($("#pgTitle"),lbl)}
     var mx_=maxY(); bar.style.transform="scaleX("+(mx_>0?y/mx_:0)+")";
     hint.classList.toggle("gone",y>40);
@@ -681,7 +721,7 @@ if(fine){
     cring.style.transform="translate3d("+rx+"px,"+ry+"px,0) translate(-50%,-50%) scale("+press.toFixed(3)+")";
     var lensOn=loupeOn&&!!inPage;
     cring.classList.toggle("hide",lensOn); cdot.style.opacity=lensOn?0:"";
-    paintLoupe(); if(!reduced)fx(); if(SC)SC.frame(pageYOffset,innerHeight,reduced);
+    paintLoupe(); if(!reduced)fx(); if(SC)SC.frame(pageYOffset,innerHeight,reduced); if(ST)ST.frame(pageYOffset,innerHeight);
     requestAnimationFrame(tick);
   })();
 }else{
@@ -707,12 +747,12 @@ if(fine){
   document.addEventListener("touchcancel",endHold);
   document.addEventListener("contextmenu",function(e){if(e.target.closest(".pg"))e.preventDefault()});
   secs.forEach(function(s){s.addEventListener("scroll",function(){ss("swiped","1")},{passive:true,once:true})});
-  (function tick(){paintLoupe(); if(!reduced)fx(); if(SC)SC.frame(pageYOffset,innerHeight,reduced); requestAnimationFrame(tick)})();
+  (function tick(){paintLoupe(); if(!reduced)fx(); if(SC)SC.frame(pageYOffset,innerHeight,reduced); if(ST)ST.frame(pageYOffset,innerHeight); requestAnimationFrame(tick)})();
 }
 
 /* ---------- resize ---------- */
 var rzT=null;
-addEventListener("resize",function(){clearTimeout(rzT);rzT=setTimeout(function(){var i=cur||1;fxState=[];layout();if(ready)goTo(i,true)},160)});
+addEventListener("resize",function(){clearTimeout(rzT);rzT=setTimeout(function(){var i=cur||1;fxState=[];layout();if(ST)ST.resize();if(ready)goTo(i,true)},160)});
 addEventListener("load",function(){measure();onScroll(true)});
 })();
 </script>

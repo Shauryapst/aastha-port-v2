@@ -50,7 +50,7 @@
   Scene.prototype.load = function () {
     if (this.loaded) return; this.loaded = true;
     var self = this, c = this.cfg;
-    ["photo", "motif", "sketch", "print", "figure", "lineup"].forEach(function (k) { if (c[k]) self[k] = img(c[k]) });
+    ["photo", "motif", "sketch", "print", "figure", "lineup", "sample", "note"].forEach(function (k) { if (c[k]) self[k] = img(c[k]) });
     if (this.type === "moodboard") this.buildBoard();
     this.resize();
   };
@@ -77,6 +77,7 @@
     else if (this.type === "motif") this.drawMotif(p);
     else if (this.type === "sketch") this.drawSketch(p);
     else if (this.type === "moodboard") this.drawBoard(p);
+    else if (this.type === "tiedye") this.drawTieDye(p);
   };
 
   /* =========================================================
@@ -375,6 +376,106 @@
     var W = this.noteWords, m = W.length;
     for (var i = 0; i < m; i++) { var a = 0.72 + i / m * 0.2; W[i].style.opacity = seg(p, a, a + 0.035).toFixed(3) }
   };
+
+  /* =========================================================
+     TIE & DYE (Baandh) — fan-fold, square folds, bind, dye,
+     unfold to reveal the real sample, then the cushions
+  ========================================================= */
+  Scene.prototype.drawTieDye = function (p) {
+    var ctx = this.ctx, c = this.cfg, W = this.W, H = this.H;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
+    var S0 = Math.min(W * 0.5, H * 0.66), cx = W / 2, cy = H / 2 + 6, N = 8, M = 8;
+    var dye = c.dye || "#c2185b", fab = [244, 240, 232], dc = hexRgb(dye);
+    var fa = eio(seg(p, 0.03, 0.2)) * (1 - eio(seg(p, 0.76, 0.86)));      // fan-fold (columns)
+    var fb = eio(seg(p, 0.2, 0.34)) * (1 - eio(seg(p, 0.67, 0.76)));      // square folds (rows)
+    var ta = fa * 1.42, tb = fb * 1.42;
+    var colW = S0 / N * Math.cos(ta) + fa * 2.2, rowH = S0 / M * Math.cos(tb) + fb * 2.2;
+    var tw = colW * N, th = rowH * M, x0 = cx - tw / 2, y0 = cy - th / 2;
+    var dyed = seg(p, 0.5, 0.62);                                           // how much dye has soaked in
+    var reveal = seg(p, 0.64, 0.7);                                         // tinted bundle -> real sample
+    var sm = this.sample, hasS = ok(sm);
+    var fin = seg(p, 0.86, 0.96);
+
+    if (fin < 1) {
+      ctx.save(); ctx.globalAlpha = 1 - fin * 0.85;
+      for (var i = 0; i < N; i++) for (var j = 0; j < M; j++) {
+        var x = x0 + i * colW, y = y0 + j * rowH;
+        if (reveal < 1) {
+          var k = dyed * (0.75 + 0.25 * hash(i, j));
+          ctx.fillStyle = "rgb(" + Math.round(lerp(fab[0], dc[0], k)) + "," + Math.round(lerp(fab[1], dc[1], k)) + "," + Math.round(lerp(fab[2], dc[2], k)) + ")";
+          ctx.fillRect(x, y, colW + .6, rowH + .6);
+        }
+        if (reveal > 0 && hasS) {
+          ctx.globalAlpha = (1 - fin * 0.85) * reveal;
+          var sw = sm.naturalWidth / N, sh = sm.naturalHeight / M;
+          ctx.drawImage(sm, i * sw, j * sh, sw, sh, x, y, colW + .6, rowH + .6);
+          ctx.globalAlpha = 1 - fin * 0.85;
+        }
+        // pleat shading: alternate faces catch the light
+        var sa = (i % 2 ? 0.34 : 0.06) * Math.sin(ta) + (j % 2 ? 0.3 : 0.04) * Math.sin(tb);
+        if (sa > 0.005) { ctx.fillStyle = "rgba(40,10,25," + sa.toFixed(3) + ")"; ctx.fillRect(x, y, colW + .6, rowH + .6) }
+      }
+      // fabric weave texture while it is still plain
+      if (dyed < 1 && reveal === 0) {
+        ctx.globalAlpha = 0.06; ctx.fillStyle = "#000";
+        for (var yy = y0; yy < y0 + th; yy += 3) ctx.fillRect(x0, yy, tw, 1);
+        ctx.globalAlpha = 1;
+      }
+      ctx.restore();
+    }
+    // binding threads wrap the bundle
+    var bind = seg(p, 0.34, 0.47) * (1 - seg(p, 0.64, 0.68));
+    if (bind > 0) {
+      ctx.save(); ctx.lineCap = "round";
+      var wraps = [[-0.5, -0.32, 0.5, -0.32], [-0.5, 0.0, 0.5, 0.0], [-0.5, 0.32, 0.5, 0.32], [-0.5, -0.5, 0.5, 0.5], [-0.5, 0.5, 0.5, -0.5]];
+      var shown = bind * wraps.length;
+      for (var w = 0; w < wraps.length && w < shown; w++) {
+        var f = Math.min(1, shown - w), q = wraps[w], pad = 6;
+        var ax = cx + q[0] * (tw + pad * 2), ay = cy + q[1] * (th + pad * 2), bx = cx + q[2] * (tw + pad * 2), by = cy + q[3] * (th + pad * 2);
+        bx = lerp(ax, bx, f); by = lerp(ay, by, f);
+        ctx.strokeStyle = "rgba(0,0,0,.35)"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(ax, ay + 1.5); ctx.lineTo(bx, by + 1.5); ctx.stroke();
+        ctx.strokeStyle = "#f6efe0"; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    // the dye bath rises, holds, and drains away
+    var up = eo(seg(p, 0.47, 0.54)), down = eio(seg(p, 0.6, 0.66)), lvl = up * (1 - down);
+    if (lvl > 0) {
+      var top = lerp(H + 10, y0 - th * 0.35 - 20, lvl);
+      ctx.save(); roundRect(ctx, 0, 0, W, H, 10); ctx.clip();
+      ctx.fillStyle = dye; ctx.globalAlpha = 0.82;
+      ctx.beginPath(); ctx.moveTo(0, H);
+      for (var xw = 0; xw <= W; xw += 10) ctx.lineTo(xw, top + Math.sin(xw * 0.03 + p * 60) * 6);
+      ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 0.25; ctx.fillStyle = "#fff";
+      for (var xb = 0; xb <= W; xb += 10) ctx.fillRect(xb, top + Math.sin(xb * 0.03 + p * 60) * 6 - 1, 6, 1.5);
+      ctx.restore();
+    }
+    // her own process note, pinned beside the cloth while folding
+    var nt = seg(p, 0.05, 0.12) * (1 - seg(p, 0.34, 0.4));
+    if (nt > 0 && ok(this.note)) {
+      var nw = Math.min(220, W * 0.24), nh = nw * this.note.naturalHeight / this.note.naturalWidth;
+      var nx = W - nw - 18, ny = 18 + (1 - eo(nt)) * -20;
+      ctx.save(); ctx.globalAlpha = nt; ctx.translate(nx + nw / 2, ny + nh / 2); ctx.rotate(0.03);
+      ctx.shadowColor = "rgba(0,0,0,.4)"; ctx.shadowBlur = 24; ctx.shadowOffsetY = 10;
+      ctx.drawImage(this.note, -nw / 2, -nh / 2, nw, nh); ctx.restore();
+      ctx.save(); ctx.globalAlpha = nt * 0.8; ctx.fillStyle = "#f2ebdc"; ctx.font = "500 11px Jost, system-ui, sans-serif";
+      ctx.fillText("Aastha's process note", nx, ny + nh + 18); ctx.restore();
+    }
+    // the cushion collection, with the sample pinned in the corner
+    if (fin > 0 && ok(this.photo)) {
+      var im = this.photo, ft = cover(im.naturalWidth, im.naturalHeight, W, H);
+      ctx.save(); roundRect(ctx, 0, 0, W, H, 10); ctx.clip(); ctx.globalAlpha = fin;
+      ctx.drawImage(im, ft.sx, ft.sy, ft.sw, ft.sh, 0, 0, W, H); ctx.restore();
+      if (hasS) {
+        var cs = Math.min(W, H) * 0.24, e3 = eo(fin), sxp = lerp(x0, 22, e3), syp = lerp(y0, H - cs - 22, e3), ss = lerp(tw, cs, e3);
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = 26; ctx.shadowOffsetY = 12;
+        ctx.fillStyle = "#fbf8f1"; ctx.fillRect(sxp - 7, syp - 7, ss + 14, ss + 14); ctx.restore();
+        ctx.drawImage(sm, sxp, syp, ss, ss);
+      }
+    }
+  };
+  function hexRgb(h) { h = h.replace("#", ""); return [parseInt(h.substr(0, 2), 16), parseInt(h.substr(2, 2), 16), parseInt(h.substr(4, 2), 16)] }
 
   /* ---------- helpers ---------- */
   function cover(iw, ih, w, h) {

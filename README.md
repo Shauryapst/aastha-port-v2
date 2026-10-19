@@ -18,7 +18,7 @@ connect the repo in Netlify; no build command, publish directory `.`.)
 - Loading screen: the name writes itself in letter by letter, then the screen splits open onto the cover.
 - Scrolling (mouse/trackpad) is smoothed; arrow keys, the ‹ › buttons and the right-hand rail glide to land each page centred.
 - Every page gently zooms as it reaches the middle of the screen; project title pages drift slightly slower (parallax).
-- Entering a new project flashes its name in the middle of the screen for a moment.
+- Jumping to a project from the Index flashes its name in the middle of the screen.
 - Magnifier: click a page, then scroll to zoom in/out (or `+` / `−`); click again to close. The lens wobbles as it moves.
   On phones: press and hold a page.
 - The cursor ring labels what you're over (Zoom, Open, Copy…) and snaps onto buttons.
@@ -33,8 +33,14 @@ Between pages, six pinned "studio" scenes play as you scroll (forwards and backw
 - **Fables of Mithila — sketch to garment:** the flat sketch draws itself, colour and print fill the silhouette, the coordinates appear.
 - **Saandra / Seed Scriptures — motif to print:** one motif (Seed starts from the ink sketch) duplicates, rotates into a half-drop repeat, the repeat unit is marked, then the final print arrives as a swatch.
 - **Roundup / Kargha — weave formation:** warp drops onto the loom, the weft travels over and under, the pattern appears, then the cloth turns into the finished product.
+- **Baandh — fold, bind, dye:** the cloth is fan-folded, folded into squares, bound, dipped in a dye bath and unfolded to reveal her real sample, then the cushions.
+
 Pressing → / ↓ on a title page glides through its scene. Assets are cut from the pages by `_edit/scenes/assets.py`;
 scene text and timings live in `_edit/scenes_def.py`; the animation code is `scenes.js`.
+
+## Case studies & colourway studio
+- After every project's title page there is a short **case study** (Brief · Process · Outcome) as real text — edit `CASES` in `_edit/scenes_def.py`.
+- After the Saandra pages, the **colourway studio** recolours her real motif live in five palettes — edit `COLOURWAYS` in the same file (`studio.js` does the recolouring).
 
 ## Updating
 - **Changed a page in Canva?** Download it as PNG and replace `img/NN.webp` and `img/xl/NN.webp`
