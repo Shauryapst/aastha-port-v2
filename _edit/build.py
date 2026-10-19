@@ -81,9 +81,28 @@ HOTSPOTS = {
     ],
 }
 
-def chapter_of(n):
-    for c in CHAPTERS:
+# Canva pages left out of the site (37: the shoot collage — the Shoot photo grid already shows these)
+SKIP = {37}
+SRC = [n for n in range(1, 46) if n not in SKIP]     # site page i shows Canva page SRC[i-1]
+NP = len(SRC)
+DISP = {n: i for i, n in enumerate(SRC, 1)}
+CHAPTERS_SRC = CHAPTERS                               # in Canva page numbers
+
+def chapter_of_src(n):
+    for c in CHAPTERS_SRC:
         if c[3] <= n <= c[4]:
+            return c
+
+def _disp_range(x, y):
+    kept = [n for n in range(x, y + 1) if n not in SKIP]
+    return DISP[kept[0]], DISP[kept[-1]]
+CHAPTERS = [(a, b, s) + _disp_range(x, y) for a, b, s, x, y in CHAPTERS_SRC]   # in site page numbers
+PAGES_SRC = PAGES
+PAGES = [PAGES_SRC[n - 1] for n in SRC]
+
+def chapter_of(i):
+    for c in CHAPTERS:
+        if c[3] <= i <= c[4]:
             return c
 
 def fx_for(n):
@@ -118,16 +137,24 @@ def toc_html():
             f'<span class="stamp-meta"><b>{k + 1:02d}</b><span class="stamp-name">{esc(title)}</span><em>{esc(sub)}</em></span>'
             f'</a></li>')
     word = "".join(f'<span style="--j:{j}">{ch}</span>' for j, ch in enumerate("CONTENTS"))
-    return (f'  <section class="pg pg-toc" id="p3" data-i="3" data-x="0" aria-label="Page 3 of 45: Contents">\n'
+    return (f'  <section class="pg pg-toc" id="p3" data-i="3" data-x="0" aria-label="Page 3 of {NP}: Contents">\n'
             f'    <div class="frame"><div class="art toc">\n'
             f'      <h2 class="toc-word" aria-label="Contents">{word}</h2>\n'
             f'      <p class="toc-note">Seven projects · tap a stamp to open it</p>\n'
             f'      <ol class="toc-list">{"".join(items)}</ol>\n'
             f'    </div></div>\n  </section>')
+def _after(html_list, n, i):
+    """Extras are defined against Canva page numbers; point them at the site page they follow."""
+    return [h.replace(f'data-after="{n}"', f'data-after="{i}"') for h in html_list]
+
 sections = []
+i = 0
 for n in range(1, 46):
-    c = chapter_of(n)
-    title = PAGES[n - 1]
+    if n in SKIP:                                # dropped page: its extras stay where they were
+        sections.extend(_after(extras_after(n), n, i)); continue
+    i += 1
+    c = chapter_of_src(n)
+    title = PAGES_SRC[n - 1]
     hots = ""
     for kind, target, label, l, t, w, h in HOTSPOTS.get(n, []):
         style = f"left:{l}%;top:{t}%;width:{w}%;height:{h}%"
@@ -138,17 +165,19 @@ for n in range(1, 46):
             hots += (f'\n      <a class="hot" href="{esc(target)}" target="_blank" rel="noopener" '
                      f'style="{style}" aria-label="{esc(label)}" data-cur="link" data-label="Open"></a>')
     eager = n <= 3
+    last = n == SRC[-1]
     # where a phone held upright starts each page (0 = left edge, 1 = right edge)
-    x = 0.6 if n == 1 else 0.82 if n == 45 else 1 if n == c[3] else 0
+    x = 0.6 if n == 1 else 0.82 if last else 1 if n == c[3] else 0
     if n == 3:                                   # contents page: live, animated stamps
-        sections.append(toc_html()); sections.extend(extras_after(n)); continue
+        sections.append(toc_html()); sections.extend(_after(extras_after(n), n, i)); continue
+    cls = "pg" + (" ch-start" if n == c[3] else "") + (" pg-last" if last else "")
     sections.append(
-f'''  <section class="pg{" ch-start" if n == c[3] else ""}" id="p{n}" data-i="{n}" data-x="{x}" aria-label="Page {n} of 45: {esc(c[1])}, {esc(title)}">
+f'''  <section class="{cls}" id="p{i}" data-i="{i}" data-x="{x}" aria-label="Page {i} of {NP}: {esc(c[1])}, {esc(title)}">
     <div class="frame"><div class="art">
       <img src="img/{n:02d}.webp" srcset="img/{n:02d}.webp 2400w, img/xl/{n:02d}.webp 4200w" sizes="(max-aspect-ratio: 1/1) 260vh, 92vw" data-n="{n}" width="2400" height="849" alt="{esc(c[1])} — {esc(title)}"{' fetchpriority="high"' if n == 1 else ''}{'' if eager else ' loading="lazy"'} decoding="async" draggable="false">{hots}
     </div></div>
   </section>''')
-    sections.extend(extras_after(n))
+    sections.extend(_after(extras_after(n), n, i))
 
 data = {
     "pages": PAGES,
@@ -156,7 +185,7 @@ data = {
 }
 
 ticks = []
-for n in range(1, 46):
+for n in range(1, NP + 1):
     c = chapter_of(n)
     cls = "tick" + (" cs" if n == c[3] and n != 1 else "")
     ticks.append(f'<button type="button" class="{cls}" data-go="{n}" aria-label="Page {n}: {esc(c[1])} — {esc(PAGES[n-1])}" data-cur="btn"></button>')
@@ -177,7 +206,7 @@ index_items = []
 for k, (a, b, s, x, y) in enumerate(CHAPTERS):
     rng = f"{x:02d}" if x == y else f"{x:02d}–{y:02d}"
     pages = ix_pages(x, y)
-    imgs = "".join(f'<img alt="" data-src="img/thumb/{n:02d}.webp" width="1100" height="389"{" class=on" if j == 0 else ""}>' for j, n in enumerate(pages))
+    imgs = "".join(f'<img alt="" data-src="img/thumb/{SRC[n - 1]:02d}.webp" width="1100" height="389"{" class=on" if j == 0 else ""}>' for j, n in enumerate(pages))
     dots = "".join(f'<i{" class=on" if j == 0 else ""}></i>' for j in range(len(pages)))
     count = f"{y - x + 1} page{'s' if y > x else ''}"
     big = "" if a in ("intro", "thanks") else f'<span class="ix-big">{k:02d}</span>'
@@ -189,7 +218,7 @@ f'''      <li class="ix-card ix-{a}" style="--span:{IX_SPAN[a]};--c:{IX_COL[a]}"
 
 def contact_html():
     exp = "".join(f"<li><b>{esc(t)}</b><span>{esc(d)}</span></li>" for t, d in EXPERIENCE)
-    return f'''  <section class="contact" id="contact" data-after="45" data-title="Contact" aria-labelledby="ctTitle">
+    return f'''  <section class="contact" id="contact" data-after="{NP}" data-title="Contact" aria-labelledby="ctTitle">
     <div class="ct-main">
       <p class="sc-kick">Contact</p>
       <h2 class="ct-title" id="ctTitle">Let’s talk textiles.</h2>
@@ -250,10 +279,10 @@ def jsonld():
               "sameAs": [LINKEDIN, BEHANCE]}
     works = []
     for i, (cid, title, sub, start, end) in enumerate([c for c in CHAPTERS if c[0] not in ("intro", "thanks")]):
-        c = CASES.get(start)
+        c = CASES.get(SRC[start - 1])
         works.append({"@type": "ListItem", "position": i + 1, "item": {
             "@type": "CreativeWork", "name": title, "genre": sub, "creator": {"@id": "#aastha"},
-            "description": c[2] if c else sub, "image": abs_(f"img/{start:02d}.webp"),
+            "description": c[2] if c else sub, "image": abs_(f"img/{SRC[start - 1]:02d}.webp"),
             "url": abs_(f"#p{start}")}})
     page = {"@type": "ProfilePage", "name": f"{NAME} — Textile Design Portfolio", "mainEntity": {"@id": "#aastha"},
             "inLanguage": "en", "hasPart": {"@type": "ItemList", "name": "Projects", "itemListElement": works}}
@@ -273,6 +302,7 @@ out = (tpl.replace("{{NAME}}", esc(NAME))
           .replace("{{INDEX}}", "\n".join(index_items))
           .replace("{{RIBBON}}", ribbon + ribbon)
           .replace("{{BRAND}}", "".join(f'<span class="bl" style="--i:{i}" aria-hidden="true">{esc(ch)}</span>' for i, ch in enumerate(NAME)))
+          .replace("{{NPAGES}}", str(NP))
           .replace("{{SEO}}", seo_head())
           .replace("{{JSONLD}}", jsonld())
           .replace("{{EMAIL}}", EMAIL).replace("{{NIFT}}", NIFT).replace("{{LINKEDIN}}", LINKEDIN).replace("{{BEHANCE}}", BEHANCE)
@@ -290,5 +320,5 @@ if SITE_URL:
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
         'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n'
         f'  <url><loc>{SITE_URL}/</loc><lastmod>{datetime.date.today()}</lastmod>'
-        + "".join(f"<image:image><image:loc>{SITE_URL}/img/{n:02d}.webp</image:loc></image:image>" for n in range(1, 46))
+        + "".join(f"<image:image><image:loc>{SITE_URL}/img/{n:02d}.webp</image:loc></image:image>" for n in SRC)
         + '</url>\n</urlset>\n')

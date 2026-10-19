@@ -54,10 +54,10 @@ button{font:inherit;color:inherit}
   transform:scaleX(0);transform-origin:left;transition:transform .7s var(--ease)}
 .hot:hover::after,.hot:focus-visible::after{transform:scaleX(1)}
 /* thank-you page: the contact lines underline themselves one after another */
-#p45.finale .hot::after{transform:scaleX(1)}
-#p45 .hot:nth-of-type(1)::after{transition-delay:.35s}
-#p45 .hot:nth-of-type(2)::after{transition-delay:.8s}
-#p45.finale .hot:hover::after{transition-delay:0s}
+.pg-last.finale .hot::after{transform:scaleX(1)}
+.pg-last .hot:nth-of-type(1)::after{transition-delay:.35s}
+.pg-last .hot:nth-of-type(2)::after{transition-delay:.8s}
+.pg-last.finale .hot:hover::after{transition-delay:0s}
 
 /* end of the stack: back to top */
 .end{display:flex;justify-content:center;padding:clamp(44px,7vh,80px) 0 clamp(90px,14vh,140px)}
@@ -571,7 +571,7 @@ html.reduced .sc-pin{position:relative;height:100vh}
     <div class="l-top"><span>{{TAGLINE}}</span><span class="acc">Textile · Print · Surface</span></div>
     <div class="l-bot">
       <h2 class="l-name" id="lname">{{NAME}}</h2>
-      <div class="l-side"><div class="l-count" id="lcount">00</div><div class="l-note">45 pages.<br>Click any page to magnify.</div></div>
+      <div class="l-side"><div class="l-count" id="lcount">00</div><div class="l-note">{{NPAGES}} pages.<br>Click any page to magnify.</div></div>
     </div>
     <div class="l-line" id="lline"></div>
   </div>
@@ -582,7 +582,7 @@ html.reduced .sc-pin{position:relative;height:100vh}
 <header class="chrome">
   <a class="brand" href="#p1" data-go="1" data-cur="btn" data-label="Top" aria-label="{{NAME}}">{{BRAND}}</a>
   <div class="tr">
-    <span class="count" aria-hidden="true"><b id="curn">01</b><i>/</i><span>45</span></span>
+    <span class="count" aria-hidden="true"><b id="curn">01</b><i>/</i><span>{{NPAGES}}</span></span>
     <button class="ibtn cbtn" id="ctBtn" type="button" aria-expanded="false" aria-controls="ct" data-cur="btn" data-mag><svg viewBox="0 0 20 14" aria-hidden="true"><rect x="1" y="1" width="18" height="12" rx="1.5"/><path d="m1.5 1.8 8.5 6.4 8.5-6.4"/></svg><span>Contact</span></button>
     <button class="ibtn" id="ixBtn" type="button" aria-expanded="false" aria-controls="ix" data-cur="btn" data-mag>Index <span class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
   </div>
@@ -625,7 +625,7 @@ html.reduced .sc-pin{position:relative;height:100vh}
 
 <div id="ix" role="dialog" aria-modal="true" aria-label="Index" hidden>
   <div class="ix-bg" aria-hidden="true"></div>
-  <div class="ix-top"><div><h2>Index</h2><p class="ix-meta">Seven projects · 45 pages · print, weave, tie &amp; dye</p></div><button class="ix-close" id="ixClose" type="button" data-cur="btn" data-mag>Close</button></div>
+  <div class="ix-top"><div><h2>Index</h2><p class="ix-meta">Seven projects · {{NPAGES}} pages · print, weave, tie &amp; dye</p></div><button class="ix-close" id="ixClose" type="button" data-cur="btn" data-mag>Close</button></div>
   <div class="ix-ribbon" aria-hidden="true"><div class="ix-track">{{RIBBON}}</div></div>
   <ul class="ix-list">
 {{INDEX}}
@@ -667,7 +667,7 @@ if(SC)SC.init(JSON.parse(document.getElementById("scene-data").textContent));
 var ST=window.Studios||null; if(ST)ST.init();
 
 var secs=$$(".pg"), frames=secs.map(function(s){return $(".frame",s)}), arts=secs.map(function(s){return $(".art",s)});
-var isTitle=secs.map(function(s){return s.classList.contains("ch-start")&&s.id!=="p45"});   /* the contact page never crops */
+var isTitle=secs.map(function(s){return s.classList.contains("ch-start")&&!s.classList.contains("pg-last")});   /* the contact page never crops */
 var toc=$(".pg-toc");
 var tops=[], hs=[], cur=0, ready=false, idxOpen=false, portrait=false;
 
@@ -780,7 +780,7 @@ function setCur(i){
   ticks.forEach(function(t,k){t.classList.toggle("on",k===i-1)});
   if(typeof threadTo==="function")threadTo(i);
   lastCh=ch;
-  if(i===N){$("#p45").classList.add("finale");totop.classList.add("show")}
+  if(i===N){$(".pg-last").classList.add("finale");totop.classList.add("show")}
   clearTimeout(hashT); hashT=setTimeout(function(){try{history.replaceState(null,"",i===1?location.pathname:"#p"+i)}catch(e){}},250);
 }
 var ticking=false, curLbl=null, extras=$$("[data-after]");
