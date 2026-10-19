@@ -62,3 +62,5 @@ STRAIGHT DRAFT (p36), GEOMETRY (p39). Re-run it after replacing the slide images
 - **Added or removed pages / renamed a section?** Edit the lists at the top of `_edit/build.py`,
   then run `python3 _edit/build.py` — it rewrites `index.html`.
 - **Clickable email/Behance/LinkedIn areas** on pages 2 and 45 are set in `HOTSPOTS` in `_edit/build.py`.
+- Index: drifting watercolour, a moving ribbon of project names, an editorial grid; each card flips through its project's pages (`img/thumb/`, 1100px) with a slow pan inside a running stitch in the project's colour.
+- Right rail: a thread with a stitch per page and a bead per project, dyed up to the current page, ending in a needle.

@@ -141,14 +141,33 @@ for n in range(1, 46):
     cls = "tick" + (" cs" if n == c[3] and n != 1 else "")
     ticks.append(f'<button type="button" class="{cls}" data-go="{n}" aria-label="Page {n}: {esc(c[1])} — {esc(PAGES[n-1])}" data-cur="btn"></button>')
 
+# Index: an editorial grid; every card keeps flipping through its project's pages
+IX_SPAN = {"intro": 5, "unbuilt": 7, "mithila": 7, "saandra": 5, "seed": 4, "roundup": 4, "kargha": 4, "baandh": 8, "thanks": 4}
+IX_COL = {"intro": "#e9dcc0", "unbuilt": "#c9933a", "mithila": "#e0573b", "saandra": "#8a78d8", "seed": "#e0709a",
+          "roundup": "#4f93d6", "kargha": "#93b552", "baandh": "#7f9be0", "thanks": "#e9dcc0"}
+
+def ix_pages(x, y, most=5):
+    span = list(range(x, y + 1))
+    if len(span) <= most:
+        return span
+    step = (len(span) - 1) / (most - 1)
+    return sorted({span[round(k * step)] for k in range(most)})
+
 index_items = []
-for a, b, s, x, y in CHAPTERS:
+for k, (a, b, s, x, y) in enumerate(CHAPTERS):
     rng = f"{x:02d}" if x == y else f"{x:02d}–{y:02d}"
+    pages = ix_pages(x, y)
+    imgs = "".join(f'<img alt="" data-src="img/thumb/{n:02d}.webp" width="1100" height="389"{" class=on" if j == 0 else ""}>' for j, n in enumerate(pages))
+    dots = "".join(f'<i{" class=on" if j == 0 else ""}></i>' for j in range(len(pages)))
+    count = f"{y - x + 1} page{'s' if y > x else ''}"
+    big = "" if a in ("intro", "thanks") else f'<span class="ix-big">{k:02d}</span>'
     index_items.append(
-f'''      <li><button type="button" class="ix-item" data-go="{x}" data-cur="btn" data-label="Open">
-        <span class="ix-thumb"{' style="--ox:50%"' if x in (1, 45) else ''}><img alt="" data-src="img/{x:02d}.webp" width="2400" height="849"></span>
+f'''      <li class="ix-card ix-{a}" style="--span:{IX_SPAN[a]};--c:{IX_COL[a]}"><button type="button" class="ix-item" data-go="{x}" data-cur="btn" data-label="Open">
+        <span class="ix-thumb"><span class="ix-slides">{imgs}</span><span class="ix-stitch" aria-hidden="true"></span>{big}<span class="ix-dots" aria-hidden="true">{dots}</span><span class="ix-count">{count}</span></span>
         <span class="ix-text"><span class="ix-num">{rng}</span><span class="ix-title">{esc(b)}</span><span class="ix-sub">{esc(s)}</span></span>
       </button></li>''')
+
+ribbon = "".join(f'<span><i style="background:{IX_COL[a]}"></i>{esc(b)}</span>' for a, b, s, x, y in CHAPTERS if a not in ("intro", "thanks"))
 
 tpl = pathlib.Path(__file__).with_name("template.html").read_text()
 out = (tpl.replace("{{NAME}}", esc(NAME))
@@ -156,6 +175,7 @@ out = (tpl.replace("{{NAME}}", esc(NAME))
           .replace("{{SECTIONS}}", "\n".join(sections))
           .replace("{{TICKS}}", "\n    ".join(ticks))
           .replace("{{INDEX}}", "\n".join(index_items))
+          .replace("{{RIBBON}}", ribbon + ribbon)
           .replace("{{DATA}}", json.dumps(data, ensure_ascii=False))
           .replace("{{SCENEDATA}}", scene_data()))
 pathlib.Path(__file__).resolve().parent.parent.joinpath("index.html").write_text(out)

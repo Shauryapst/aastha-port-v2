@@ -184,18 +184,62 @@ html.portrait{scroll-snap-type:y proximity}
   clip-path:circle(0px at var(--cx,95%) var(--cy,40px));transition:clip-path .9s var(--ease);visibility:hidden}
 #ix.open{clip-path:circle(150vmax at var(--cx,95%) var(--cy,40px));visibility:visible}
 #ix.closing{visibility:visible}
-.ix-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-bottom:clamp(20px,4vw,48px)}
+#ix{isolation:isolate}
+/* the watercolour behind the index keeps drifting, like dye moving through cloth */
+.ix-bg{position:fixed;inset:-12%;z-index:-1;pointer-events:none;background:url("img/bg/watercolour-dark.webp") center/cover no-repeat;opacity:.55;
+  animation:ixDrift 38s ease-in-out infinite alternate}
+@keyframes ixDrift{0%{transform:translate3d(-3%,-2%,0) scale(1.04) rotate(-1deg)}50%{transform:translate3d(2%,1.5%,0) scale(1.1) rotate(.6deg)}100%{transform:translate3d(-1%,3%,0) scale(1.06) rotate(1.2deg)}}
+.ix-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-bottom:clamp(14px,2vw,24px)}
+.ix-meta{margin:14px 0 0 6px;font:500 12px/1 var(--font-ui);letter-spacing:.2em;text-transform:uppercase;opacity:.65}
+/* a woven-label ribbon of project names that never stops moving */
+.ix-ribbon{overflow:hidden;margin:0 calc(-1 * var(--pad)) clamp(28px,4vw,52px);padding:13px 0;border-block:1px solid rgba(242,235,220,.16);
+  background:repeating-linear-gradient(90deg,rgba(242,235,220,.035) 0 2px,transparent 2px 5px)}
+.ix-track{display:flex;width:max-content;animation:ixRibbon 46s linear infinite}
+.ix-track span{display:inline-flex;align-items:center;gap:18px;padding-right:38px;font:400 clamp(22px,2.4vw,34px)/1 var(--font-display);white-space:nowrap}
+.ix-track i{width:12px;height:12px;border-radius:50%;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25),0 0 0 3px rgba(242,235,220,.08)}
+@keyframes ixRibbon{to{transform:translateX(-50%)}}
 .ix-top h2{margin:0;font:400 clamp(56px,10vw,150px)/.85 var(--font-display)}
 .ix-close{appearance:none;background:none;border:1.5px solid currentColor;border-radius:999px;padding:11px 18px;
   font:500 12px/1 var(--font-ui);letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .3s,color .3s}
 .ix-close:hover{background:var(--cream);color:var(--teal-deep)}
-.ix-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:30px 26px}
+.ix-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(26px,3vw,44px) clamp(16px,1.8vw,28px)}
+.ix-card{grid-column:span var(--span,4)}
+@media (max-width:900px){.ix-card{grid-column:span 6}.ix-intro,.ix-baandh{grid-column:span 12}}
+@media (max-width:600px){.ix-card{grid-column:span 12}}
 .ix-item{appearance:none;background:none;border:0;padding:0;text-align:left;cursor:pointer;width:100%;display:flex;flex-direction:column;gap:12px}
-.ix-thumb{position:relative;display:block;aspect-ratio:19/10;overflow:hidden;border-radius:6px;background:#24494a;
+.ix-thumb{position:relative;display:block;height:clamp(190px,21vw,330px);overflow:hidden;border-radius:6px;background:#24494a;
   transform:perspective(900px);transition:transform .7s var(--ease),box-shadow .7s var(--ease);will-change:transform}
 .ix-thumb.tilting{transition:transform .12s linear,box-shadow .4s var(--ease);box-shadow:0 30px 50px -28px rgba(0,0,0,.6)}
-.ix-thumb img{width:100%;height:100%;display:block;object-fit:cover;object-position:var(--ox,100%) 50%}
-.ix-thumb::after{content:"";position:absolute;inset:0;pointer-events:none;
+/* each card flips through its project's pages, panning slowly across each wide page */
+.ix-slides{position:absolute;inset:0}
+.ix-slides img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;object-position:0% 50%;opacity:0;
+  transition:opacity 1.2s var(--ease)}
+.ix-slides img.on{opacity:1;z-index:1}
+#ix.open .ix-slides img.on{animation:ixPan var(--pan,7s) linear both}
+#ix.open .ix-slides img.was{opacity:0;z-index:2;animation:ixPan var(--pan,7s) linear both;animation-play-state:paused}
+@keyframes ixPan{0%{object-position:0% 50%;transform:scale(1.08)}100%{object-position:100% 50%;transform:scale(1)}}
+/* a running stitch in the project's colour, always travelling round the card */
+.ix-stitch{position:absolute;inset:9px;z-index:3;pointer-events:none;opacity:.9;
+  background:linear-gradient(90deg,var(--c) 0 8px,transparent 8px) 0 0/14px 2px repeat-x,
+             linear-gradient(180deg,var(--c) 0 8px,transparent 8px) 100% 0/2px 14px repeat-y,
+             linear-gradient(90deg,var(--c) 0 8px,transparent 8px) 0 100%/14px 2px repeat-x,
+             linear-gradient(180deg,var(--c) 0 8px,transparent 8px) 0 0/2px 14px repeat-y;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.45));animation:ixStitch 1.6s linear infinite}
+@keyframes ixStitch{to{background-position:14px 0,100% 14px,-14px 100%,0 -14px}}
+/* soft shade in the corners so the numeral, dots and page count read over light pages */
+.ix-slides::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(120% 90% at 0% 0%,rgba(14,32,33,.55),rgba(14,32,33,0) 42%),linear-gradient(0deg,rgba(14,32,33,.42),rgba(14,32,33,0) 34%)}
+html.ix-open #toast{opacity:0!important}
+.ix-big{position:absolute;left:20px;top:12px;z-index:3;font:400 clamp(54px,6vw,96px)/1 var(--font-display);color:transparent;
+  -webkit-text-stroke:1.4px rgba(255,255,255,.95);text-shadow:0 2px 18px rgba(0,0,0,.25);pointer-events:none}
+.ix-dots{position:absolute;left:22px;bottom:20px;z-index:3;display:flex;gap:6px}
+.ix-dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.55);box-shadow:0 0 0 1px rgba(0,0,0,.18);transition:background .4s,transform .4s var(--ease)}
+.ix-dots i.on{background:var(--c);transform:scale(1.45)}
+.ix-count{position:absolute;right:20px;bottom:16px;z-index:3;padding:6px 11px;border-radius:999px;background:rgba(14,32,33,.62);color:var(--cream);
+  font:500 11px/1 var(--font-ui);letter-spacing:.12em;text-transform:uppercase;backdrop-filter:blur(4px)}
+.ix-item:hover .ix-stitch{animation-duration:.6s}
+.ix-text{border-left:3px solid var(--c);padding-left:12px}
+.ix-thumb::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;
   background:radial-gradient(circle at var(--sx,50%) var(--sy,50%),rgba(255,255,255,.26),rgba(255,255,255,0) 55%);opacity:0;transition:opacity .4s}
 .ix-thumb.tilting::after{opacity:1}
 .ix-text{display:grid;grid-template-columns:auto 1fr;column-gap:14px;align-items:baseline}
@@ -427,6 +471,7 @@ html.reduced .sc-pin{position:relative;height:100vh}
 @media (prefers-reduced-motion:reduce){
   .hint b,.l-name .c{animation:none!important;opacity:1;transform:none;filter:none}
   #ix,.l-half,.l-content,.roll .r,.ix-list li,.ix-thumb,#totop,.hot::after{transition:none!important}
+  .ix-bg,.ix-track,.ix-stitch,.ix-slides img{animation:none!important}
   #chflash{display:none}
 }
 </style>
@@ -479,7 +524,9 @@ html.reduced .sc-pin{position:relative;height:100vh}
 </main>
 
 <div id="ix" role="dialog" aria-modal="true" aria-label="Index" hidden>
-  <div class="ix-top"><h2>Index</h2><button class="ix-close" id="ixClose" type="button" data-cur="btn" data-mag>Close</button></div>
+  <div class="ix-bg" aria-hidden="true"></div>
+  <div class="ix-top"><div><h2>Index</h2><p class="ix-meta">Seven projects · 45 pages · print, weave, tie &amp; dye</p></div><button class="ix-close" id="ixClose" type="button" data-cur="btn" data-mag>Close</button></div>
+  <div class="ix-ribbon" aria-hidden="true"><div class="ix-track">{{RIBBON}}</div></div>
   <ul class="ix-list">
 {{INDEX}}
   </ul>
@@ -732,7 +779,9 @@ $$("[data-go]").forEach(function(el){
 var ix=$("#ix"), ixBtn=$("#ixBtn");
 function openIndex(){
   if(idxOpen)return; idxOpen=true; loupeOn=false; mode=0;
-  $$(".ix-thumb img",ix).forEach(function(im,k){if(!im.getAttribute("src"))im.src=im.dataset.src;im.closest("li").style.setProperty("--d",(k*0.05)+"s")});
+  $$(".ix-slides img",ix).forEach(function(im){if(!im.getAttribute("src"))im.src=im.dataset.src});
+  $$(".ix-card",ix).forEach(function(li,k){li.style.setProperty("--d",(k*0.06)+"s")});
+  startFlips();
   var r=ixBtn.getBoundingClientRect();
   ix.style.setProperty("--cx",(r.left+r.width/2)+"px"); ix.style.setProperty("--cy",(r.top+r.height/2)+"px");
   ix.hidden=false; ix.scrollTop=0; root.classList.add("ix-open"); ixBtn.setAttribute("aria-expanded","true");
@@ -743,8 +792,27 @@ function closeIndex(){
   if(!idxOpen)return; idxOpen=false;
   ix.classList.add("closing"); ix.classList.remove("open");
   root.classList.remove("ix-open"); ixBtn.setAttribute("aria-expanded","false");
-  setTimeout(function(){ix.classList.remove("closing");ix.hidden=true},reduced?0:900);
+  setTimeout(function(){ix.classList.remove("closing");ix.hidden=true;stopFlips()},reduced?0:900);
 }
+var flipT=[];
+function startFlips(){
+  stopFlips(); if(reduced)return;
+  $$(".ix-card",ix).forEach(function(li,k){
+    var imgs=$$(".ix-slides img",li), dots=$$(".ix-dots i",li); if(imgs.length<2)return;
+    var i=0, per=3400+(k%3)*450;                       /* cards drift out of step, so the grid never flips all at once */
+    li.style.setProperty("--pan",(per/1000+1.4)+"s");
+    function next(){
+      var a=imgs[i]; i=(i+1)%imgs.length; var b=imgs[i];
+      a.classList.remove("on"); a.classList.add("was");
+      b.classList.remove("was"); void b.offsetWidth; b.classList.add("on");
+      setTimeout(function(){a.classList.remove("was")},1300);
+      dots.forEach(function(d,j){d.classList.toggle("on",j===i)});
+      flipT[k]=setTimeout(next,per);
+    }
+    flipT[k]=setTimeout(next,900+k*380);
+  });
+}
+function stopFlips(){flipT.forEach(clearTimeout);flipT=[]}
 ixBtn.addEventListener("click",openIndex);
 $("#ixClose").addEventListener("click",function(){closeIndex();ixBtn.focus({preventScroll:true})});
 if(fine&&!reduced)$$(".ix-thumb",ix).forEach(function(t){
