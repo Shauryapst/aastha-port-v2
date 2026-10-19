@@ -233,7 +233,7 @@
       ctx.restore();
       if (draw < 1) {                           // pen tip
         var a = -Math.PI / 2 + Math.PI * 2 * draw, pr = Math.max(mw, mh) * 0.48;
-        ctx.fillStyle = "#f2ebdc"; ctx.beginPath(); ctx.arc(cx + Math.cos(a) * pr, cy + Math.sin(a) * pr, 4, 0, 7); ctx.fill();
+        ctx.fillStyle = "#1f2b2a"; ctx.beginPath(); ctx.arc(cx + Math.cos(a) * pr, cy + Math.sin(a) * pr, 4, 0, 7); ctx.fill();
       }
     }
     // the repeat unit, outlined
@@ -252,11 +252,11 @@
     var fin = seg(p, 0.78, 0.92);
     if (fin > 0 && ok(this.print)) {
       var pi = this.print, e2 = eo(fin);
-      ctx.fillStyle = "rgba(22,59,60," + (0.62 * fin) + ")"; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = "rgba(246,241,230," + (0.82 * fin) + ")"; ctx.fillRect(0, 0, W, H);
       var ar2 = pi.naturalWidth / pi.naturalHeight, cw = Math.min(W * 0.7, H * 0.74 * ar2), chh = cw / ar2, pad = 10;
       var x1 = cx - cw / 2, y1 = cy - chh / 2 - 12 + (1 - e2) * 60;
       ctx.globalAlpha = Math.min(1, fin * 1.4);
-      ctx.save(); ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 22;
+      ctx.save(); ctx.shadowColor = "rgba(31,43,42,.35)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 22;
       ctx.fillStyle = "#fbf8f1"; roundRect(ctx, x1 - pad, y1 - pad, cw + pad * 2, chh + pad * 2 + 34, 6); ctx.fill(); ctx.restore();
       ctx.drawImage(pi, x1, y1, cw, chh);
       ctx.font = "500 12px Jost, system-ui, sans-serif"; ctx.fillStyle = "#163b3c";
@@ -318,7 +318,7 @@
     // 1. sketch lines draw on, top to bottom
     var drawn = seg(p, 0.02, 0.36) * this.len.tot, lineA = 1 - seg(p, 0.6, 0.76);
     if (drawn > 0 && lineA > 0) {
-      ctx.strokeStyle = "rgba(242,235,220," + (0.95 * lineA) + ")"; ctx.lineWidth = 1.4; ctx.lineJoin = "round"; ctx.lineCap = "round";
+      ctx.strokeStyle = "rgba(31,43,42," + (0.9 * lineA) + ")"; ctx.lineWidth = 1.4; ctx.lineJoin = "round"; ctx.lineCap = "round";
       var acc = 0, tip = null;
       for (var i = 0; i < lines.length && acc < drawn; i++) {
         var l = lines[i], need = drawn - acc, segLen = this.len.each[i];
@@ -332,7 +332,7 @@
         }
         ctx.stroke(); acc += segLen;
       }
-      if (tip && drawn < this.len.tot) { ctx.fillStyle = "#f2ebdc"; ctx.beginPath(); ctx.arc(tip[0], tip[1], 3.2, 0, 7); ctx.fill() }
+      if (tip && drawn < this.len.tot) { ctx.fillStyle = "#1f2b2a"; ctx.beginPath(); ctx.arc(tip[0], tip[1], 3.2, 0, 7); ctx.fill() }
     }
   };
 
@@ -459,7 +459,7 @@
       ctx.save(); ctx.globalAlpha = nt; ctx.translate(nx + nw / 2, ny + nh / 2); ctx.rotate(0.03);
       ctx.shadowColor = "rgba(0,0,0,.4)"; ctx.shadowBlur = 24; ctx.shadowOffsetY = 10;
       ctx.drawImage(this.note, -nw / 2, -nh / 2, nw, nh); ctx.restore();
-      ctx.save(); ctx.globalAlpha = nt * 0.8; ctx.fillStyle = "#f2ebdc"; ctx.font = "500 11px Jost, system-ui, sans-serif";
+      ctx.save(); ctx.globalAlpha = nt * 0.8; ctx.fillStyle = "#1f2b2a"; ctx.font = "500 11px Jost, system-ui, sans-serif";
       ctx.fillText("Aastha's process note", nx, ny + nh + 18); ctx.restore();
     }
     // the cushion collection, with the sample pinned in the corner
