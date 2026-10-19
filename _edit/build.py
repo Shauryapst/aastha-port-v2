@@ -79,6 +79,31 @@ esc = html.escape
 import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from scenes_def import extras_after, scene_data
+
+TOC_STAMPS = ["unbuilt", "fables", "saandra", "seed", "roundup", "kargha", "baandh"]
+TOC_TILT = [-4, 3, -2, 5, -3, 4, -5]
+
+def toc_html():
+    projects = [c for c in CHAPTERS if c[0] not in ("intro", "thanks")]
+    items = []
+    for k, ((cid, title, sub, start, end), stamp) in enumerate(zip(projects, TOC_STAMPS)):
+        items.append(
+            f'<li style="--i:{k};--r:{TOC_TILT[k]}deg">'
+            f'<a class="stamp" href="#p{start}" data-go="{start}" data-cur="btn" data-label="Open" aria-label="{k + 1:02d} {esc(title)} — {esc(sub)}">'
+            f'<span class="stamp-img"><img src="img/toc/{stamp}.webp" alt="" width="420" height="420" decoding="async"></span>'
+            f'<svg class="postmark" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="pm{k}" d="M60 60 m-41 0 a41 41 0 1 1 82 0 a41 41 0 1 1 -82 0"/></defs>'
+            f'<circle cx="60" cy="60" r="52"/><circle cx="60" cy="60" r="30"/>'
+            f'<text><textPath href="#pm{k}" startOffset="2%">NIFT · TEXTILE DESIGN · 2026 ·</textPath></text>'
+            f'<text class="pm-n" x="60" y="68" text-anchor="middle">{k + 1:02d}</text></svg>'
+            f'<span class="stamp-meta"><b>{k + 1:02d}</b><span class="stamp-name">{esc(title)}</span><em>{esc(sub)}</em></span>'
+            f'</a></li>')
+    word = "".join(f'<span style="--j:{j}">{ch}</span>' for j, ch in enumerate("CONTENTS"))
+    return (f'  <section class="pg pg-toc" id="p3" data-i="3" data-x="0" aria-label="Page 3 of 45: Contents">\n'
+            f'    <div class="frame"><div class="art toc">\n'
+            f'      <h2 class="toc-word" aria-label="Contents">{word}</h2>\n'
+            f'      <p class="toc-note">Seven projects · tap a stamp to open it</p>\n'
+            f'      <ol class="toc-list">{"".join(items)}</ol>\n'
+            f'    </div></div>\n  </section>')
 sections = []
 for n in range(1, 46):
     c = chapter_of(n)
@@ -95,6 +120,8 @@ for n in range(1, 46):
     eager = n <= 3
     # where a phone held upright starts each page (0 = left edge, 1 = right edge)
     x = 0.6 if n == 1 else 0.82 if n == 45 else 1 if n == c[3] else 0
+    if n == 3:                                   # contents page: live, animated stamps
+        sections.append(toc_html()); sections.extend(extras_after(n)); continue
     sections.append(
 f'''  <section class="pg{" ch-start" if n == c[3] else ""}" id="p{n}" data-i="{n}" data-x="{x}" aria-label="Page {n} of 45: {esc(c[1])}, {esc(title)}">
     <div class="frame"><div class="art">

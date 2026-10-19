@@ -14,7 +14,7 @@
 <link rel="preload" as="image" href="img/01.webp" imagesrcset="img/01.webp 2400w, img/xl/01.webp 4200w" imagesizes="(max-aspect-ratio: 1/1) 260vh, 92vw">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Italiana&family=Jost:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Italiana&family=Jost:wght@400;500;600&display=swap">
 <script>document.documentElement.classList.add("js")</script>
 <style>
 /* =========================================================
@@ -352,6 +352,58 @@ html.portrait{scroll-snap-type:y proximity}
 .lbx-cap{position:absolute;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);color:var(--cream);font:500 12px/1 var(--font-ui);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
 .lbx-close{position:absolute;top:calc(18px + env(safe-area-inset-top,0px));right:var(--pad);appearance:none;background:none;border:1.5px solid var(--cream);color:var(--cream);
   border-radius:999px;padding:10px 16px;font:500 12px/1 var(--font-ui);letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+
+/* ---------- contents page: stamps drop in and get postmarked ---------- */
+.pg-toc .frame{container-type:inline-size;background:#f6f2ea url("img/toc/paper.webp") 0 0/32cqw auto repeat}
+.pg-toc .art{display:grid;grid-template-columns:13cqw 1fr;align-items:center;padding:2.6cqw 6cqw 2.6cqw 4cqw;line-height:normal}
+.toc-word{margin:0;display:flex;flex-direction:column;align-items:center;font:400 3.2cqw/1 "Archivo Black","Arial Black",sans-serif;color:#111;letter-spacing:0}
+.toc-word span{display:block}
+.toc-note{position:absolute;right:6cqw;bottom:2.4cqw;margin:0;font:500 .78cqw/1 var(--font-ui);letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.toc-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(7,9.4cqw);gap:2cqw 1.6cqw;justify-content:start;align-content:center}
+.toc-list li{position:relative}
+.stamp{display:block;position:relative;width:9.4cqw;color:var(--ink);text-decoration:none;transform:rotate(var(--r));transition:transform .6s var(--ease)}
+.stamp-img{display:block;transition:transform .6s var(--ease),filter .6s var(--ease);filter:drop-shadow(0 .45cqw .7cqw rgba(31,43,42,.3))}
+.pg-toc .art img{position:static;inset:auto;display:block;width:100%;height:auto;max-width:100%;object-fit:contain}
+.postmark{position:absolute;width:5.6cqw;height:5.6cqw;right:-1.6cqw;top:-1.8cqw;fill:none;stroke:#23407a;stroke-width:2.4;opacity:.78;
+  transform:rotate(-14deg);mix-blend-mode:multiply;pointer-events:none}
+.postmark text{fill:#23407a;stroke:none;font:600 9px var(--font-ui);letter-spacing:1.6px}
+.postmark .pm-n{font:400 30px var(--font-display);letter-spacing:0}
+.stamp-meta{display:grid;grid-template-columns:auto 1fr;column-gap:.7cqw;align-items:baseline;margin-top:1cqw}
+.stamp-meta b{font:600 .8cqw/1 var(--font-ui);letter-spacing:.08em;color:var(--teal)}
+.stamp-name{font:400 1.3cqw/1.08 var(--font-display)}
+.stamp-meta em{grid-column:2;font:400 .74cqw/1.35 var(--font-ui);font-style:normal;color:var(--muted);margin-top:.3cqw;opacity:.75;transform:none;transition:opacity .4s,transform .5s var(--ease)}
+.stamp:hover,.stamp:focus-visible{transform:rotate(0deg) translateY(-.8cqw)}
+.stamp:hover .stamp-img,.stamp:focus-visible .stamp-img{transform:scale(1.07);filter:drop-shadow(0 1.4cqw 1.6cqw rgba(31,43,42,.35))}
+.stamp:hover em,.stamp:focus-visible em{opacity:1;transform:none}
+.toc-list:hover .stamp:not(:hover) .stamp-img{filter:drop-shadow(0 .45cqw .7cqw rgba(31,43,42,.3)) saturate(.55) opacity(.75)}
+
+/* the entrance — only once the page is on screen; reduced motion skips it */
+html.js:not(.reduced) .pg-toc:not(.play) .toc-word span,
+html.js:not(.reduced) .pg-toc:not(.play) .toc-list li,
+html.js:not(.reduced) .pg-toc:not(.play) .postmark{opacity:0}
+.pg-toc.play .toc-word span{animation:tocLetter .8s cubic-bezier(.2,1.45,.35,1) calc(var(--j) * 70ms) both}
+.pg-toc.play .toc-list li{animation:tocDrop 1s cubic-bezier(.18,1.25,.35,1) calc(var(--i) * 130ms + .45s) both}
+.pg-toc.play .postmark{animation:tocMark .45s cubic-bezier(.3,1.6,.5,1) calc(var(--i) * 130ms + 1.25s) both}
+.pg-toc.play .stamp-img{animation:tocThud .5s ease-out calc(var(--i) * 130ms + 1.2s) both}
+@keyframes tocLetter{0%{opacity:0;transform:translateY(-140%) rotate(-18deg)}100%{opacity:1;transform:none}}
+@keyframes tocDrop{0%{opacity:0;transform:translate(6cqw,-34cqw) rotate(calc(var(--r) * 7)) scale(1.4)}55%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes tocMark{0%{opacity:0;transform:rotate(18deg) scale(2.1)}100%{opacity:.78;transform:rotate(-14deg) scale(1)}}
+@keyframes tocThud{0%{transform:scale(1.04)}40%{transform:scale(.97)}100%{transform:none}}
+
+/* phones held upright: a vertical album instead of a wide slide */
+.portrait .pg-toc{height:auto;min-height:100vh;min-height:100dvh;display:block;overflow:visible;padding:0}
+.portrait .pg-toc .frame{width:100%;height:auto;min-height:100dvh;aspect-ratio:auto}
+.portrait .pg-toc .art{position:relative;display:block;padding:84px 22px 60px}
+.portrait .toc-word{flex-direction:row;justify-content:center;gap:1.5cqw;font-size:10cqw;margin-bottom:6cqw}
+.portrait .toc-list{grid-template-columns:repeat(2,1fr);gap:9cqw 6cqw;justify-items:center}
+.portrait .stamp{width:36cqw}
+.portrait .postmark{width:20cqw;height:20cqw;right:-6cqw;top:-6cqw}
+.portrait .stamp-meta{margin-top:2.6cqw}
+.portrait .stamp-meta b{font-size:2.8cqw}.portrait .stamp-name{font-size:5cqw}.portrait .stamp-meta em{font-size:2.9cqw;opacity:1;transform:none}
+.portrait .toc-note{bottom:auto;right:auto}
+.portrait .toc-note{position:static;text-align:center;margin-top:8cqw;font-size:2.6cqw}
+@keyframes tocDropP{0%{opacity:0;transform:translateY(-60cqw) rotate(calc(var(--r) * 7)) scale(1.3)}55%{opacity:1}100%{opacity:1;transform:none}}
+.portrait .pg-toc.play .toc-list li{animation-name:tocDropP}
 html.reduced .scene{height:auto}
 html.reduced .sc-pin{position:relative;height:100vh}
 @media (max-width:760px){.tr{gap:16px}.ptt{display:none}.brand{font-size:21px}}
@@ -452,6 +504,7 @@ var ST=window.Studios||null; if(ST)ST.init();
 
 var secs=$$(".pg"), frames=secs.map(function(s){return $(".frame",s)}), arts=secs.map(function(s){return $(".art",s)});
 var isTitle=secs.map(function(s){return s.classList.contains("ch-start")});
+var toc=$(".pg-toc");
 var tops=[], hs=[], cur=0, ready=false, idxOpen=false, portrait=false;
 
 function layout(){portrait=mqP.matches;root.classList.toggle("portrait",portrait);measure();if(portrait)startRows()}
@@ -500,9 +553,9 @@ function wheelScroll(d){
   if(mode!==1)sTarget=sy;
   mode=1; sTarget=clamp(sTarget+d,0,maxY()); run();
 }
-function tweenTo(y,dur){
+function tweenTo(y,dur,scenic){
   y=clamp(y,0,maxY()); sy=pageYOffset;
-  var nsc=SC?SC.between(sy,y):0;
+  var nsc=(SC&&scenic)?SC.between(sy,y):0;
   tw={from:sy,to:y,t0:performance.now(),dur:dur||(clamp(500+Math.abs(y-sy)*0.12,650,1400)+nsc*4600),sine:nsc>0}; mode=2; run();
 }
 function run(){if(!running){running=true;requestAnimationFrame(stepS)}}
@@ -520,14 +573,14 @@ function targetFor(i){
   if(portrait)return tops[i-1];
   return tops[i-1]+hs[i-1]/2-innerHeight/2;   /* centre the page on screen */
 }
-function goTo(i,instant){
+function goTo(i,instant,scenic){
   i=clamp(i,1,N); measure(); loupeOn=false;
   var y=clamp(targetFor(i),0,maxY());
   if(instant){mode=0;window.scrollTo(0,y)}
-  else if(smoothOn())tweenTo(y);
+  else if(smoothOn())tweenTo(y,scenic?0:clamp(500+Math.abs(y-pageYOffset)*0.05,600,1300),scenic);
   else window.scrollTo({top:y,behavior:reduced?"auto":"smooth"});
 }
-function step(d){goTo((cur||1)+d)}
+function step(d){goTo((cur||1)+d,false,true)}
 
 /* ---------- current page, labels, rail, progress, project flash, finale ---------- */
 var curn=$("#curn"), bar=$("#bar"), hint=$("#hint"), ticks=$$(".tick"), tip=$("#tip"), totop=$("#totop");
@@ -573,6 +626,7 @@ function onScroll(force){
     if(lbl!==curLbl){curLbl=lbl;roll($("#pgTitle"),lbl)}
     var mx_=maxY(); bar.style.transform="scaleX("+(mx_>0?y/mx_:0)+")";
     hint.classList.toggle("gone",y>40);
+    if(toc&&!toc.classList.contains("play")){var tr=toc.getBoundingClientRect();if(tr.top<innerHeight*.8&&tr.bottom>innerHeight*.2)toc.classList.add("play")}
   });
 }
 addEventListener("scroll",function(){onScroll()},{passive:true});
@@ -726,7 +780,7 @@ if(fine){
   function ringFor(target){
     var t=target&&target.closest?target.closest("[data-cur]"):null;
     var pg=target&&target.closest?target.closest(".pg"):null;
-    var kind=t?t.dataset.cur:(pg?"page":"none");
+    var kind=t?t.dataset.cur:((pg&&!pg.classList.contains("pg-toc"))?"page":"none");
     mag=(t&&t.hasAttribute("data-mag"))?t:null;
     var size=SIZES[kind]||40;
     if(mag){var r=mag.getBoundingClientRect();size=Math.max(r.width,r.height)+14}
@@ -736,7 +790,7 @@ if(fine){
     else{cring.style.width="";cring.style.height=""}
     var label=mag?"":(t&&t.dataset.label)?t.dataset.label:(kind==="page"&&!loupeOn)?"Zoom":"";
     clbl.textContent=label; cring.classList.toggle("lbl",!!label);
-    inPage=(pg&&!target.closest(".hot"))?pg:null;
+    inPage=(pg&&!target.closest(".hot")&&!pg.classList.contains("pg-toc"))?pg:null;
     return pg;
   }
   document.addEventListener("mouseover",function(e){
@@ -746,7 +800,7 @@ if(fine){
   });
   document.addEventListener("click",function(e){
     if(!ready||idxOpen)return;
-    var pg=e.target.closest(".pg"); if(!pg||e.target.closest(".hot"))return;
+    var pg=e.target.closest(".pg"); if(!pg||e.target.closest(".hot")||pg.classList.contains("pg-toc"))return;
     loupeOn=!loupeOn; inPage=pg; mode=0;
     if(loupeOn)setLoupeImage(pg);
     ringFor(e.target);
@@ -767,7 +821,7 @@ if(fine){
   var holdT=null, sx=0, sy0=0, holding=false;
   document.addEventListener("touchstart",function(e){
     if(!ready||idxOpen||e.touches.length>1)return;
-    var pg=e.target.closest(".pg"); if(!pg||e.target.closest(".hot"))return;
+    var pg=e.target.closest(".pg"); if(!pg||e.target.closest(".hot")||pg.classList.contains("pg-toc"))return;
     var t=e.touches[0]; sx=mx=pmx=t.clientX; sy0=my=pmy=t.clientY;
     clearTimeout(holdT);
     holdT=setTimeout(function(){
