@@ -218,3 +218,48 @@ def extras_after(n):
     if n == STUDIO_AFTER:
         out.append(studio_html())
     return out
+
+
+# ---------------------------------------------------------------
+# Print libraries & the shoot — built from the separate images
+# (img/lib/, cut from "PORTFOLIO SLIDES/IMAGES" by _edit/lib.json)
+# after_page: (no, project, title, subtitle, [(file, caption)], kind)
+# ---------------------------------------------------------------
+LIB_META = {m["file"]: m for m in json.loads((pathlib.Path(__file__).resolve().parent / "lib.json").read_text())}
+
+def _files(prefix):
+    return sorted([f for f in LIB_META if f.startswith(prefix)], key=lambda f: [int(x) for x in f.split(".")[0].split("-")[-2:]])
+
+LIBS = {
+    9:  ("01", "Unbuilt", "Print library", "Eight algae prints, each with its own palette — shown large so the brush texture reads.",
+         [(f, f"Print {k + 1:02d}") for k, f in enumerate(_files("unbuilt-"))], "prints"),
+    18: ("02", "Fables of Mithila", "Print library", "Nine prints across three coordinate sets · repeat 15 × 15 in.",
+         [(f, f"Set {k // 3 + 1} · print {k % 3 + 1}") for k, f in enumerate(_files("fables-"))], "prints"),
+    24: ("03", "Saandra", "Print library", "Six prints from Rajasthani architecture · repeat 12 × 12 in.",
+         [(f, f"Print {k + 1:02d}") for k, f in enumerate(_files("saandra-"))], "prints"),
+    32: ("04", "Seed Scriptures", "Print library", "Five pomegranate prints · repeat 8 × 8 in.",
+         [(f, f"Print {k + 1:02d}") for k, f in enumerate(_files("seed-"))], "prints"),
+    36: ("05", "Roundup", "The shoot", "Both handwoven mufflers, worn — muffler 1 in blue twill and honeycomb, muffler 2 in the yellow-and-blue check.",
+         [(f, ("Muffler 1" if "blue" in f else "Muffler 2")) for f in _files("shoot-blue-") + _files("shoot-yellow-")], "shoot"),
+}
+
+
+def lib_html(n):
+    no, proj, title, sub, items, kind = LIBS[n]
+    cards = "".join(
+        f'<figure class="lib-card"><button type="button" class="lib-open" data-full="img/lib/{f}" data-cap="{esc(proj)} — {esc(c)}" '
+        f'data-cur="btn" data-label="View" aria-label="View {esc(proj)} {esc(c)} large">'
+        f'<img src="img/lib/{f}" loading="lazy" decoding="async" alt="{esc(proj)} — {esc(c)}" width="{LIB_META[f]["w"]}" height="{LIB_META[f]["h"]}">'
+        f'</button><figcaption>{esc(c)}</figcaption></figure>' for f, c in items)
+    return (f'  <section class="lib lib--{kind}" data-after="{n}" data-title="{esc(title)}" aria-label="{esc(proj)} — {esc(title)}">\n'
+            f'    <div class="lib-head"><span class="sc-kick">{no} · {esc(proj)}</span><h2 class="lib-title">{esc(title)}</h2>'
+            f'<p class="lib-sub">{esc(sub)}</p></div>\n'
+            f'    <div class="lib-grid">{cards}</div>\n  </section>')
+
+
+_prev_extras = extras_after
+def extras_after(n):
+    out = _prev_extras(n)
+    if n in LIBS:
+        out.insert(0, lib_html(n))
+    return out

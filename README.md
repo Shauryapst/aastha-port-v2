@@ -42,6 +42,14 @@ scene text and timings live in `_edit/scenes_def.py`; the animation code is `sce
 - After every project's title page there is a short **case study** (Brief · Process · Outcome) as real text — edit `CASES` in `_edit/scenes_def.py`.
 - After the Saandra pages, the **colourway studio** recolours her real motif live in five palettes — edit `COLOURWAYS` in the same file (`studio.js` does the recolouring).
 
+## Print libraries, the shoot & backgrounds
+- The separate images from Canva ("PORTFOLIO SLIDES/IMAGES") are cut into single prints and photos in `img/lib/`
+  (list in `_edit/lib.json`). They appear as **print libraries** after Unbuilt, Fables of Mithila, Saandra and Seed Scriptures,
+  and as **The shoot** after the Roundup photos. Click any print or photo for a large view; click again to zoom.
+  Sections and captions are set in `LIBS` in `_edit/scenes_def.py`.
+- The dark scene and studio backgrounds use her cover watercolour (lettering removed): `img/bg/watercolour-dark.webp`;
+  the print libraries sit on a faint wash of `img/bg/watercolour.webp`.
+
 ## Updating
 - **Changed a page in Canva?** Download it as PNG and replace `img/NN.webp` and `img/xl/NN.webp`
   (2400 px and 4200 px wide, WebP). Or ask Claude to redo the conversion.

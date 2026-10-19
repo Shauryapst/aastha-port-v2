@@ -224,8 +224,11 @@ html.portrait{scroll-snap-type:y proximity}
   background:var(--teal-deep);color:var(--cream)}
 .sc-pin{position:sticky;top:0;height:100vh;height:100svh;display:grid;grid-template-columns:minmax(250px,.9fr) 2.6fr;
   gap:clamp(20px,3.4vw,64px);align-items:center;padding:clamp(72px,10vh,104px) var(--gx) clamp(72px,10vh,96px);overflow:hidden}
-.sc-pin::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.07;
-  background:repeating-linear-gradient(90deg,var(--cream) 0 1px,transparent 1px 7px),repeating-linear-gradient(0deg,var(--cream) 0 1px,transparent 1px 7px)}
+.sc-pin,.studio{background:var(--teal-deep) url("img/bg/watercolour-dark.webp") center/cover no-repeat}
+.sc-pin::before,.studio::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,rgba(18,47,48,.72) 0%,rgba(18,47,48,.28) 38%,rgba(18,47,48,.1) 100%)}
+.studio{position:relative}
+.studio>*{position:relative}
 .sc-cap{position:relative;align-self:center}
 .sc-kick{font:500 12px/1 var(--font-ui);letter-spacing:.22em;text-transform:uppercase;opacity:.7}
 .sc-title{font:400 clamp(40px,4.4vw,74px)/.95 var(--font-display);margin:14px 0 14px}
@@ -316,6 +319,39 @@ html.portrait{scroll-snap-type:y proximity}
   .st-wname{font-size:15px}
   .st-stage{height:58vh}
 }
+
+/* ---------- print libraries & the shoot (separate images) ---------- */
+.lib{position:relative;padding:clamp(34px,4vw,60px) clamp(4px,1vw,12px) clamp(20px,3vw,40px)}
+.lib::before{content:"";position:absolute;inset:0 calc(50% - 50vw);z-index:-1;pointer-events:none;
+  background:url("img/bg/watercolour.webp") center/cover no-repeat;opacity:.16}
+.lib-head{display:grid;grid-template-columns:auto 1fr;column-gap:24px;align-items:baseline;margin-bottom:clamp(20px,2.6vw,36px)}
+.lib-head .sc-kick{grid-column:1/-1;color:var(--teal);opacity:1}
+.lib-title{margin:10px 0 0;font:400 clamp(36px,4vw,64px)/1 var(--font-display)}
+.lib-sub{margin:0;max-width:52ch;font:400 15px/1.55 var(--font-ui);color:#3b4644;align-self:end}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:clamp(14px,1.8vw,26px)}
+.lib--shoot .lib-grid{grid-template-columns:repeat(4,1fr)}
+.lib-card{margin:0;display:flex;flex-direction:column;gap:9px}
+.lib-open{appearance:none;border:0;padding:0;background:#fbf8f1;cursor:pointer;display:block;border-radius:4px;overflow:hidden;
+  box-shadow:0 1px 0 rgba(31,43,42,.08),0 24px 40px -28px rgba(31,43,42,.6);transition:transform .7s var(--ease),box-shadow .7s var(--ease)}
+.lib-open img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;transition:transform 1.2s var(--ease)}
+.lib--shoot .lib-open img{aspect-ratio:3/4;object-position:50% 20%}
+.lib-open:hover{transform:translateY(-6px) rotate(-.6deg);box-shadow:0 1px 0 rgba(31,43,42,.08),0 40px 50px -30px rgba(31,43,42,.7)}
+.lib-open:hover img{transform:scale(1.06)}
+.lib-card figcaption{font:500 11px/1.3 var(--font-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+@media (max-width:760px){.lib-head{grid-template-columns:1fr}.lib-sub{margin-top:8px}.lib-grid{grid-template-columns:1fr 1fr;gap:12px}.lib--shoot .lib-grid{grid-template-columns:1fr 1fr}}
+.portrait .lib{padding:76px 16px 30px}
+
+/* large view: the image follows the pointer at 2.2× */
+#lbx{position:fixed;inset:0;z-index:260;display:grid;place-items:center;background:rgba(14,32,33,.94);opacity:0;pointer-events:none;transition:opacity .4s var(--ease)}
+#lbx.on{opacity:1;pointer-events:auto}
+.lbx-frame{position:relative;max-width:min(88vw,1100px);max-height:82vh;overflow:hidden;border-radius:6px;box-shadow:0 40px 90px rgba(0,0,0,.55);
+  transform:scale(.94);transition:transform .6s var(--ease)}
+#lbx.on .lbx-frame{transform:none}
+.lbx-frame img{display:block;max-width:min(88vw,1100px);max-height:82vh;width:auto;height:auto;transition:transform .35s var(--ease);transform-origin:var(--ox,50%) var(--oy,50%)}
+.lbx-frame.zoom img{transform:scale(2.2)}
+.lbx-cap{position:absolute;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);color:var(--cream);font:500 12px/1 var(--font-ui);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.lbx-close{position:absolute;top:calc(18px + env(safe-area-inset-top,0px));right:var(--pad);appearance:none;background:none;border:1.5px solid var(--cream);color:var(--cream);
+  border-radius:999px;padding:10px 16px;font:500 12px/1 var(--font-ui);letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
 html.reduced .scene{height:auto}
 html.reduced .sc-pin{position:relative;height:100vh}
 @media (max-width:760px){.tr{gap:16px}.ptt{display:none}.brand{font-size:21px}}
@@ -386,6 +422,7 @@ html.reduced .sc-pin{position:relative;height:100vh}
   </div>
 </div>
 
+<div id="lbx" role="dialog" aria-modal="true" aria-label="Large view" aria-hidden="true"><button class="lbx-close" type="button" data-cur="btn">Close</button><div class="lbx-frame"><img alt=""></div><p class="lbx-cap"></p></div>
 <div id="cdot"></div><div id="cring"><span></span></div><div id="loupe" data-z="2.5×"></div>
 <div id="toast" role="status"></div>
 
@@ -605,6 +642,7 @@ if(fine&&!reduced)$$(".ix-thumb",ix).forEach(function(t){
 addEventListener("keydown",function(e){
   if(e.metaKey||e.ctrlKey||e.altKey)return;
   if(idxOpen){if(e.key==="Escape"){e.preventDefault();closeIndex();ixBtn.focus({preventScroll:true})}return}
+  if(window.__lbxOpen&&__lbxOpen())return;
   if(!ready)return;
   var tag=(e.target.tagName||"").toLowerCase(), onCtl=(tag==="button"||tag==="a");
   switch(e.key){
@@ -667,7 +705,7 @@ function paintLoupe(){
 
 /* one wheel handler: zoom the lens when it is open, otherwise smooth-scroll */
 addEventListener("wheel",function(e){
-  if(idxOpen||!ready)return;
+  if(idxOpen||!ready||(window.__lbxOpen&&__lbxOpen()))return;
   if(loupeOn&&inPage&&!e.ctrlKey){e.preventDefault();setZoom(zoom*Math.exp(-clamp(normDelta(e),-120,120)*0.0011));return}
   if(!smoothOn()||e.ctrlKey)return;
   if(Math.abs(e.deltaX)>Math.abs(e.deltaY))return;
@@ -750,6 +788,21 @@ if(fine){
   (function tick(){paintLoupe(); if(!reduced)fx(); if(SC)SC.frame(pageYOffset,innerHeight,reduced); if(ST)ST.frame(pageYOffset,innerHeight); requestAnimationFrame(tick)})();
 }
 
+
+/* ---------- large view for the print libraries & shoot ---------- */
+(function(){
+  var box=$("#lbx"), frame=$(".lbx-frame",box), img=$("img",frame), cap=$(".lbx-cap",box), opener=null;
+  function open(b){opener=b;img.src=b.dataset.full;img.alt=b.dataset.cap;cap.textContent=b.dataset.cap+(fine?"  ·  click to zoom":"");
+    box.classList.add("on");box.setAttribute("aria-hidden","false");root.classList.add("ix-open");loupeOn=false;$(".lbx-close",box).focus({preventScroll:true})}
+  function close(){box.classList.remove("on");box.setAttribute("aria-hidden","true");frame.classList.remove("zoom");root.classList.remove("ix-open");if(opener)opener.focus({preventScroll:true})}
+  $$(".lib-open").forEach(function(b){b.addEventListener("click",function(e){e.stopPropagation();open(b)})});
+  $(".lbx-close",box).addEventListener("click",close);
+  box.addEventListener("click",function(e){if(e.target===box)close()});
+  frame.addEventListener("click",function(e){e.stopPropagation();frame.classList.toggle("zoom")});
+  frame.addEventListener("mousemove",function(e){var r=frame.getBoundingClientRect();frame.style.setProperty("--ox",((e.clientX-r.left)/r.width*100)+"%");frame.style.setProperty("--oy",((e.clientY-r.top)/r.height*100)+"%")});
+  addEventListener("keydown",function(e){if(box.classList.contains("on")&&e.key==="Escape"){e.stopImmediatePropagation();close()}},true);
+  window.__lbxOpen=function(){return box.classList.contains("on")};
+})();
 /* ---------- resize ---------- */
 var rzT=null;
 addEventListener("resize",function(){clearTimeout(rzT);rzT=setTimeout(function(){var i=cur||1;fxState=[];layout();if(ST)ST.resize();if(ready)goTo(i,true)},160)});

@@ -129,7 +129,8 @@ meta["unbuiltPalette"] = [{"code": c + " TCX", "hex": swatch(6, (x - 40, y - 40,
 
 # --- woven products ---
 crop(37, (2135, 25, 4130, 1460), "roundup-photo.webp", maxw=1800)
-crop(38, (2050, 0, 4200, 990), "kargha-photo.webp", maxw=1800)
+# kargha-photo.webp is a fixed asset: the belt close-up from the earlier export of page 38
+# (the current title page shows the belts too thin for the weave reveal), so it is not re-cut here.
 
 
 # --- Baandh: tie & dye (pages 42, 44) ---
