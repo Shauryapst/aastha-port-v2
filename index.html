@@ -282,7 +282,7 @@ html:not(.js) #loader{display:none}
 .l-line{position:absolute;left:0;bottom:0;height:3px;background:var(--teal);width:0;transition:width .4s var(--ease)}
 
 /* ---------- floating chrome ---------- */
-.chrome,.chrome-b,#bar,.hint,#chflash{mix-blend-mode:difference;color:var(--chrome)}
+.chrome,.chrome-b,.hint,#chflash{mix-blend-mode:difference;color:var(--chrome)}
 .chrome{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:flex-start;
   padding:calc(18px + env(safe-area-inset-top,0px)) var(--pad) 0;pointer-events:none}
 .chrome>*,.chrome-b>*{pointer-events:auto}
@@ -338,7 +338,35 @@ html.ct-open,html.ct-open body{overflow:hidden}
   display:grid;place-items:center;cursor:pointer;transition:transform .5s var(--ease)}
 .nb:hover{transform:scale(1.12)}
 .nb svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6}
-#bar{position:fixed;left:0;top:0;right:0;height:2px;background:var(--chrome);transform:scaleX(0);transform-origin:left;z-index:60;pointer-events:none}
+/* progress: a woven tape in the current project's colour */
+:root{--hc:#2f6e70}
+#bar{position:fixed;left:0;top:0;right:0;height:5px;transform:scaleX(0);transform-origin:left;z-index:60;pointer-events:none;
+  background:repeating-linear-gradient(90deg,rgba(0,0,0,.22) 0 1px,transparent 1px 4px),
+             repeating-linear-gradient(0deg,rgba(255,255,255,.28) 0 1px,transparent 1px 2.5px),var(--hc);
+  box-shadow:0 1px 3px rgba(31,43,42,.25);transition:background-color .8s}
+#bar::after{content:"";position:absolute;right:-2px;top:-2px;width:9px;height:9px;border-radius:50%;background:var(--hc);
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,.25),0 0 0 2px rgba(251,248,241,.8)}
+
+/* the name: letters stitch in, then keep rippling like cloth in a breeze */
+.brand .bl{display:inline-block;white-space:pre;transform-origin:50% 90%}
+html:not(.loading) .brand .bl{animation:blIn .9s cubic-bezier(.2,1.3,.4,1) calc(var(--i) * 55ms) both,blWave 6s ease-in-out calc(1.2s + var(--i) * 140ms) infinite}
+@keyframes blIn{0%{opacity:0;transform:translateY(70%) rotate(10deg)}100%{opacity:1;transform:none}}
+@keyframes blWave{0%,100%{transform:none}50%{transform:translateY(-2px) rotate(-2deg)}}
+.brand:hover .bl{animation-play-state:running;color:inherit}
+/* a running stitch under the name, in the colour of the project you're in, with a needle still sewing */
+#hstitch{position:fixed;z-index:51;pointer-events:none;height:14px;opacity:0;transition:opacity .6s,width .8s var(--ease)}
+html:not(.loading) #hstitch{opacity:1}
+#hstitch svg{display:block;width:100%;height:100%;overflow:visible}
+#hstitch svg.hs-n{position:absolute;right:-30px;top:-4px;width:34px;height:8px}
+#hstitch .hs-line{fill:none;stroke:var(--hc);stroke-width:2;stroke-linecap:round;stroke-dasharray:7 5;animation:hsRun 1.4s linear infinite;
+  transition:stroke .8s;filter:drop-shadow(0 1px 0 rgba(251,248,241,.7))}
+#hstitch .hs-draw{stroke-dasharray:1 0}
+@keyframes hsRun{to{stroke-dashoffset:-24}}
+#hstitch .hs-needle{animation:hsSew 1.4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 50%}
+#hstitch .hs-needle path{fill:#d9d4c7;stroke:#4a514e;stroke-width:.7}
+#hstitch .hs-needle ellipse{fill:#fbf8f1;stroke:#4a514e;stroke-width:.5}
+@keyframes hsSew{0%,100%{transform:translate(0,0) rotate(-28deg)}50%{transform:translate(3px,4px) rotate(-12deg)}}
+.brand:hover~#hstitch .hs-line,html.hs-hot #hstitch .hs-line{animation-duration:.5s}
 .hint{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;
   display:flex;flex-direction:column;align-items:center;gap:8px;font:500 11px/1 var(--font-ui);letter-spacing:.16em;text-transform:uppercase;
   pointer-events:none;transition:opacity .6s}
@@ -706,7 +734,7 @@ html.reduced .sc-pin{position:relative;height:100vh}
 @media (prefers-reduced-motion:reduce){
   .hint b,.l-name .c{animation:none!important;opacity:1;transform:none;filter:none}
   #ix,.l-half,.l-content,.roll .r,.ix-list li,.ix-thumb,#totop,.hot::after{transition:none!important}
-  .ix-bg,.ix-track,.ix-stitch,.ix-slides img{animation:none!important}
+  .ix-bg,.ix-track,.ix-stitch,.ix-slides img,.brand .bl,#hstitch .hs-line,#hstitch .hs-needle{animation:none!important}
   #chflash{display:none}
 }
 </style>
@@ -726,8 +754,9 @@ html.reduced .sc-pin{position:relative;height:100vh}
 </div>
 
 <div id="bar"></div>
+<div id="hstitch" aria-hidden="true"><svg viewBox="0 0 200 14" preserveAspectRatio="none"><path class="hs-line" d="M0 7 Q12.5 3 25 7 T50 7 T75 7 T100 7 T125 7 T150 7 T175 7 T200 7" vector-effect="non-scaling-stroke"/></svg><svg class="hs-n" viewBox="-22 -4 40 8"><g class="hs-needle"><path d="M-21 0 Q-20 -2.1 -14 -2.1 L13 -.7 Q16 0 13 .7 L-14 2.1 Q-20 2.1 -21 0Z"/><ellipse cx="-16.5" cy="0" rx="2.6" ry=".85"/></g></svg></div>
 <header class="chrome">
-  <a class="brand" href="#p1" data-go="1" data-cur="btn" data-label="Top">Aastha Rajput</a>
+  <a class="brand" href="#p1" data-go="1" data-cur="btn" data-label="Top" aria-label="Aastha Rajput"><span class="bl" style="--i:0" aria-hidden="true">A</span><span class="bl" style="--i:1" aria-hidden="true">a</span><span class="bl" style="--i:2" aria-hidden="true">s</span><span class="bl" style="--i:3" aria-hidden="true">t</span><span class="bl" style="--i:4" aria-hidden="true">h</span><span class="bl" style="--i:5" aria-hidden="true">a</span><span class="bl" style="--i:6" aria-hidden="true"> </span><span class="bl" style="--i:7" aria-hidden="true">R</span><span class="bl" style="--i:8" aria-hidden="true">a</span><span class="bl" style="--i:9" aria-hidden="true">j</span><span class="bl" style="--i:10" aria-hidden="true">p</span><span class="bl" style="--i:11" aria-hidden="true">u</span><span class="bl" style="--i:12" aria-hidden="true">t</span></a>
   <div class="tr">
     <span class="count" aria-hidden="true"><b id="curn">01</b><i>/</i><span>45</span></span>
     <button class="ibtn cbtn" id="ctBtn" type="button" aria-expanded="false" aria-controls="ct" data-cur="btn" data-mag><svg viewBox="0 0 20 14" aria-hidden="true"><rect x="1" y="1" width="18" height="12" rx="1.5"/><path d="m1.5 1.8 8.5 6.4 8.5-6.4"/></svg><span>Contact</span></button>
@@ -1336,7 +1365,8 @@ var minShow=reduced?0:1700;
 function start(){
   if(ready)return; ready=true;
   var L=$("#loader"); L.classList.add("out"); setTimeout(function(){L.remove()},reduced?0:1500);
-  root.classList.remove("loading");
+  root.classList.remove("loading"); placeStitch();
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(placeStitch);
   measure();
   var m=/^#p(\d+)$/.exec(location.hash), n=m?clamp(+m[1],1,N):1;
   if(n>1)goTo(n,true);
@@ -1401,8 +1431,15 @@ function flash(ch){
   $("#cfTitle").textContent=ch.title; $("#cfSub").textContent=ch.sub;
   cf.classList.remove("on"); void cf.offsetWidth; cf.classList.add("on");
 }
+var HC={intro:"#2f6e70",unbuilt:"#c9933a",mithila:"#d2452b",saandra:"#5a46a8",seed:"#d0567f",roundup:"#2f6ea8",kargha:"#6f8f3a",baandh:"#23407a",thanks:"#2f6e70"};
+function placeStitch(){
+  var hs=$("#hstitch"), b=$(".brand"); if(!hs||!b)return;
+  var r=b.getBoundingClientRect(); if(!r.width)return;
+  hs.style.left=(r.left-2)+"px"; hs.style.top=(r.bottom+3)+"px"; hs.style.width=(r.width+4)+"px";
+}
 function setCur(i){
   if(i===cur)return; cur=i;
+  root.style.setProperty("--hc",HC[chapterOf(i).id]||"#2f6e70");
   curn.textContent=pad(i);
   var ch=chapterOf(i);
   roll($("#chName"),ch.title);
@@ -1751,7 +1788,7 @@ if(fine){
 })();
 /* ---------- resize ---------- */
 var rzT=null;
-addEventListener("resize",function(){clearTimeout(rzT);rzT=setTimeout(function(){var i=cur||1;fxState=[];layout();if(ST)ST.resize();if(ready)goTo(i,true)},160)});
+addEventListener("resize",function(){clearTimeout(rzT);rzT=setTimeout(function(){placeStitch();var i=cur||1;fxState=[];layout();if(ST)ST.resize();if(ready)goTo(i,true)},160)});
 addEventListener("load",function(){measure();onScroll(true)});
 })();
 </script>
